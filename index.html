@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Our Wedding Memories</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
+<style>
+  :root { --cream:#FBF6EC; --sage:#9CAF88; --sage-dark:#6F8660; --gold:#D4AF37; --ink:#4A4A3F; }
+  html, body { background: var(--cream); color: var(--ink); font-family: 'Montserrat', sans-serif; }
+  .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
+  .gold { color: var(--gold); }
+  body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+
+  /* Masonry grid */
+  .masonry { column-count: 2; column-gap: 12px; }
+  @media (min-width: 768px) { .masonry { column-count: 3; column-gap: 16px; } }
+  @media (min-width: 1100px) { .masonry { column-count: 4; } }
+  .tile { break-inside: avoid; margin-bottom: 12px; border-radius: 14px; overflow: hidden; background: #EFE8D6;
+          box-shadow: 0 6px 18px rgba(111,134,96,.18); border: 2px solid #fff; animation: pop .5s ease-out; }
+  @media (min-width: 768px) { .tile { margin-bottom: 16px; } }
+  @keyframes pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
+
+  /* Anti-saving: no selection, no long-press menu, no drag, no pointer events on the image itself */
+  .protect, .protect * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
+  .tile img { display: block; width: 100%; height: auto; pointer-events: none; }
+  .tile .shield { position: absolute; inset: 0; background: transparent; }
+
+  /* Main button pulse */
+  .cta { background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%); box-shadow: 0 10px 28px rgba(111,134,96,.45); transition: transform .15s ease; }
+  .cta:active { transform: scale(.96); }
+  .ring { position:absolute; inset:-6px; border-radius:9999px; border:2px solid var(--gold); opacity:.6; animation: ring 2.4s ease-out infinite; }
+  @keyframes ring { 0% { transform: scale(.96); opacity:.7; } 100% { transform: scale(1.12); opacity:0; } }
+
+  .spinner { width:64px; height:64px; border-radius:9999px; border:5px solid rgba(212,175,55,.25); border-top-color: var(--gold); animation: spin 1s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .ring, .tile, .spinner { animation: none; } }
+  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- Live counter -->
+<div class="text-center py-3 text-sm font-medium tracking-wide" style="background:var(--sage); color:#fff;">
+  <span id="counterText">✨ 0 Memories Captured So Far ✨</span>
+</div>
+
+<main class="max-w-5xl mx-auto px-4 pb-16">
+
+  <!-- Header -->
+  <header class="text-center pt-10 pb-8">
+    <i data-lucide="heart" class="mx-auto mb-3 gold" style="width:28px;height:28px;"></i>
+    <h1 class="serif text-5xl md:text-6xl gold font-semibold leading-tight" id="coupleNames">Emma &amp; James</h1>
+    <p class="serif italic text-2xl mt-2" style="color:var(--sage-dark);">Help us keep every moment</p>
+    <p class="mt-4 text-sm max-w-md mx-auto leading-relaxed opacity-80">
+      Snap a photo or choose one from your phone. It appears in the gallery below for everyone to see.
+    </p>
+  </header>
+
+  <!-- Main button -->
+  <section class="flex flex-col items-center py-4">
+    <div class="relative">
+      <span class="ring"></span>
+      <button id="uploadBtn" type="button" class="cta relative text-white rounded-full px-8 py-5 text-lg font-semibold flex items-center gap-3">
+        <span>📸 Take or Upload Photo</span>
+      </button>
+    </div>
+    <input id="fileInput" type="file" accept="image/*" multiple class="hidden">
+    <p id="statusMsg" class="mt-5 text-sm text-center min-h-[1.25rem]" role="status"></p>
+    <p id="demoNote" class="hidden mt-2 text-xs text-center max-w-sm rounded-lg px-3 py-2" style="background:#F3E9C6;">
+      Preview mode: photos show on this device only until you add your Apps Script URL.
+    </p>
+  </section>
+
+  <!-- Gallery -->
+  <section class="mt-6">
+    <div class="flex items-center gap-4 mb-6">
+      <div class="flex-1 h-px" style="background:var(--gold); opacity:.5;"></div>
+      <h2 class="serif text-3xl gold">The Gallery</h2>
+      <div class="flex-1 h-px" style="background:var(--gold); opacity:.5;"></div>
+    </div>
+    <p id="emptyMsg" class="text-center text-sm opacity-70 py-10">No photos yet. Be the first to share a memory.</p>
+    <div id="gallery" class="masonry protect"></div>
+  </section>
+</main>
+
+<!-- Loading overlay -->
+<div id="overlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center text-center px-8"
+     style="background: rgba(251,246,236,.94); backdrop-filter: blur(6px);" aria-live="assertive">
+  <div class="spinner mb-6"></div>
+  <p class="serif text-3xl gold">Polishing your memory...</p>
+  <p class="mt-2 text-sm">Please don't close this page.</p>
+  <p id="progressText" class="mt-3 text-xs opacity-70"></p>
+</div>
+
+<script>
+/* =====================================================================
+   SETUP (3 steps, no coding needed)
+   1. Go to script.google.com > New project. Delete everything in the editor.
+   2. Paste the BACKEND CODE below (between the two lines) and click Save.
+   3. Deploy > New deployment > type: Web app > Execute as: Me >
+      Who has access: Anyone > Deploy. Authorize when asked, copy the
+      "Web app URL" and paste it into DEPLOYED_SCRIPT_URL further down.
+      (Any time you edit the backend code, use Deploy > Manage deployments >
+      edit > New version, so the URL keeps working.)
+
+   ---------------- BACKEND CODE: Google Apps Script ----------------
+   const FOLDER_NAME = "Wedding Memories";   // Created in your Google Drive automatically
+
+   function getFolder() {
+     const it = DriveApp.getFoldersByName(FOLDER_NAME);
+     return it.hasNext() ? it.next() : DriveApp.createFolder(FOLDER_NAME);
+   }
+
+   function photoUrl(id) {
+     return "https://drive.google.com/thumbnail?id=" + id + "&sz=w1200";
+   }
+
+   function reply(obj) {
+     return ContentService.createTextOutput(JSON.stringify(obj))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+
+   // Receives a Base64 image, saves it in the folder, returns its URL
+   function doPost(e) {
+     try {
+       const data = JSON.parse(e.postData.contents);
+       const blob = Utilities.newBlob(
+         Utilities.base64Decode(data.image),
+         data.mimeType || "image/jpeg",
+         "memory_" + Date.now() + ".jpg"
+       );
+       const file = getFolder().createFile(blob);
+       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+       return reply({ success: true, id: file.getId(), url: photoUrl(file.getId()) });
+     } catch (err) {
+       return reply({ success: false, error: String(err) });
+     }
+   }
+
+   // Returns the newest photos so every guest sees the live gallery
+   function doGet() {
+     const files = getFolder().getFiles();
+     const list = [];
+     while (files.hasNext()) {
+       const f = files.next();
+       list.push({ id: f.getId(), time: f.getDateCreated().getTime() });
+     }
+     list.sort(function (a, b) { return b.time - a.time; });
+     return reply({
+       success: true,
+       photos: list.slice(0, 300).map(function (p) { return { id: p.id, url: photoUrl(p.id) }; })
+     });
+   }
+   ---------------- END OF BACKEND CODE ----------------
+
+   The bride and groom download the originals straight from the
+   "Wedding Memories" folder in Google Drive. The website has no download button.
+   ===================================================================== */
+
+/* ========= YOUR SETTINGS ========= */
+const DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4kw3DRR4c3pu1Cx9XDwjvbR03k0wg1x_RywAV2CBhqVqHawK-QBP7CBWQpygokU9IEg/exec";
+const COUPLE_NAMES = "Aida & Emir";   // Change to your names
+const MAX_IMAGE_SIDE = 1600;           // Photos are resized to this size before upload (faster on mobile data)
+const REFRESH_SECONDS = 20;            // How often the gallery checks for new photos from other guests
+/* ================================= */
+
+const IS_DEMO = DEPLOYED_SCRIPT_URL.indexOf("YOUR_APPS_SCRIPT_URL_HERE") !== -1;
+const $ = (id) => document.getElementById(id);
+const seen = new Set();
+
+document.getElementById("coupleNames").textContent = COUPLE_NAMES;
+document.title = COUPLE_NAMES + " - Wedding Memories";
+if (IS_DEMO) $("demoNote").classList.remove("hidden");
+lucide.createIcons();
+
+/* ---- Block right-click, long-press menu and dragging on the gallery ---- */
+["contextmenu", "dragstart", "selectstart"].forEach((evt) => {
+  $("gallery").addEventListener(evt, (e) => e.preventDefault());
+});
+
+/* ---- Counter ---- */
+function updateCounter() {
+  $("counterText").textContent = "✨ " + seen.size + " Memories Captured So Far ✨";
+  $("emptyMsg").classList.toggle("hidden", seen.size > 0);
+}
+
+/* ---- Add a photo to the masonry grid ---- */
+function addPhoto(id, url, fallbackUrl, atTop) {
+  if (seen.has(id)) return;
+  seen.add(id);
+  const tile = document.createElement("div");
+  tile.className = "tile relative";
+  const img = document.createElement("img");
+  img.alt = "Wedding memory";
+  img.loading = "lazy";
+  img.draggable = false;
+  img.referrerPolicy = "no-referrer";
+  img.src = url;
+  if (fallbackUrl) img.onerror = function () { img.onerror = null; img.src = fallbackUrl; };
+  const shield = document.createElement("div");
+  shield.className = "shield";
+  tile.appendChild(img);
+  tile.appendChild(shield);
+  const g = $("gallery");
+  if (atTop && g.firstChild) g.insertBefore(tile, g.firstChild); else g.appendChild(tile);
+  updateCounter();
+}
+
+/* ---- Load existing photos from Google Drive ---- */
+async function loadGallery() {
+  if (IS_DEMO) return;
+  try {
+    const res = await fetch(DEPLOYED_SCRIPT_URL, { method: "GET" });
+    const data = await res.json();
+    if (data && data.success && Array.isArray(data.photos)) {
+      // Photos arrive newest first. Add only unseen ones; new arrivals go to the top.
+      const fresh = data.photos.filter((p) => !seen.has(p.id));
+      const firstLoad = seen.size === 0;
+      (firstLoad ? fresh : fresh.slice().reverse()).forEach((p) => addPhoto(p.id, p.url, null, !firstLoad));
+    }
+  } catch (err) { /* offline or sleeping: try again at next refresh */ }
+}
+
+/* ---- Resize + convert image to Base64 (JPEG) ---- */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const objUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      let w = img.naturalWidth, h = img.naturalHeight;
+      const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(w, h));
+      w = Math.round(w * scale); h = Math.round(h * scale);
+      const canvas = document.createElement("canvas");
+      canvas.width = w; canvas.height = h;
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      URL.revokeObjectURL(objUrl);
+      resolve({ dataUrl: dataUrl, base64: dataUrl.split(",")[1] });
+    };
+    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error("This photo format isn't supported. Please try another photo.")); };
+    img.src = objUrl;
+  });
+}
+
+/* ---- Upload one photo ---- */
+async function uploadOne(file) {
+  const { dataUrl, base64 } = await fileToBase64(file);
+
+  if (IS_DEMO) {   // Preview mode: show locally only
+    addPhoto("local-" + Date.now() + Math.random(), dataUrl, null, true);
+    return;
+  }
+
+  // text/plain avoids a browser preflight request, which Apps Script doesn't support
+  const res = await fetch(DEPLOYED_SCRIPT_URL, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({ image: base64, mimeType: "image/jpeg", filename: file.name || "photo.jpg" })
+  });
+  const data = await res.json();
+  if (!data.success) throw new Error(data.error || "Upload failed");
+  addPhoto(data.id || data.url, data.url, dataUrl, true);   // dataUrl is a backup while Drive finishes processing
+}
+
+/* ---- Button + file handling ---- */
+$("uploadBtn").addEventListener("click", () => $("fileInput").click());
+
+$("fileInput").addEventListener("change", async (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = "";           // lets the same photo be chosen again
+  if (!files.length) return;
+
+  $("statusMsg").textContent = "";
+  $("overlay").classList.remove("hidden");
+  let ok = 0, failed = 0;
+
+  for (let i = 0; i < files.length; i++) {
+    $("progressText").textContent = files.length > 1 ? "Photo " + (i + 1) + " of " + files.length : "";
+    try { await uploadOne(files[i]); ok++; }
+    catch (err) { failed++; console.error(err); }
+  }
+
+  $("overlay").classList.add("hidden");
+  if (failed === 0) {
+    $("statusMsg").style.color = "var(--sage-dark)";
+    $("statusMsg").textContent = ok > 1 ? "Thank you! " + ok + " memories added 💛" : "Thank you! Your memory was added 💛";
+    document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+  } else {
+    $("statusMsg").style.color = "#B4533C";
+    $("statusMsg").textContent = failed + " photo(s) didn't upload. Check your connection and try again.";
+  }
+});
+
+/* ---- Start ---- */
+updateCounter();
+loadGallery();
+setInterval(loadGallery, REFRESH_SECONDS * 1000);
+</script>
+</body>
+</html>
