@@ -3,301 +3,349 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Our Wedding Memories</title>
+<title>Wedding Memories</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
 <style>
-  :root { --cream:#FBF6EC; --sage:#9CAF88; --sage-dark:#6F8660; --gold:#D4AF37; --ink:#4A4A3F; }
-  html, body { background: var(--cream); color: var(--ink); font-family: 'Montserrat', sans-serif; }
-  .serif { font-family: 'Cormorant Garamond', Georgia, serif; }
-  .gold { color: var(--gold); }
-  body { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
-
-  /* Masonry grid */
-  .masonry { column-count: 2; column-gap: 12px; }
-  @media (min-width: 768px) { .masonry { column-count: 3; column-gap: 16px; } }
-  @media (min-width: 1100px) { .masonry { column-count: 4; } }
-  .tile { break-inside: avoid; margin-bottom: 12px; border-radius: 14px; overflow: hidden; background: #EFE8D6;
-          box-shadow: 0 6px 18px rgba(111,134,96,.18); border: 2px solid #fff; animation: pop .5s ease-out; }
-  @media (min-width: 768px) { .tile { margin-bottom: 16px; } }
-  @keyframes pop { from { opacity: 0; transform: scale(.94); } to { opacity: 1; transform: scale(1); } }
-
-  /* Anti-saving: no selection, no long-press menu, no drag, no pointer events on the image itself */
-  .protect, .protect * { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-user-drag: none; }
-  .tile img { display: block; width: 100%; height: auto; pointer-events: none; }
-  .tile .shield { position: absolute; inset: 0; background: transparent; }
-
-  /* Main button pulse */
-  .cta { background: linear-gradient(135deg, var(--sage) 0%, var(--sage-dark) 100%); box-shadow: 0 10px 28px rgba(111,134,96,.45); transition: transform .15s ease; }
-  .cta:active { transform: scale(.96); }
-  .ring { position:absolute; inset:-6px; border-radius:9999px; border:2px solid var(--gold); opacity:.6; animation: ring 2.4s ease-out infinite; }
-  @keyframes ring { 0% { transform: scale(.96); opacity:.7; } 100% { transform: scale(1.12); opacity:0; } }
-
-  .spinner { width:64px; height:64px; border-radius:9999px; border:5px solid rgba(212,175,55,.25); border-top-color: var(--gold); animation: spin 1s linear infinite; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  @media (prefers-reduced-motion: reduce) { .ring, .tile, .spinner { animation: none; } }
-  button:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+:root{--cream:#FBF6EC;--sage:#9CAF88;--sage-d:#6F8660;--gold:#D4AF37}
+body{background:var(--cream);color:#4A4A3F;font-family:Montserrat,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+.serif{font-family:'Cormorant Garamond',Georgia,serif}.gold{color:var(--gold)}
+.masonry{column-count:2;column-gap:10px}
+@media(min-width:768px){.masonry{column-count:3}}@media(min-width:1100px){.masonry{column-count:4}}
+.tile{position:relative;break-inside:avoid;margin-bottom:10px;border-radius:14px;overflow:hidden;background:#EFE8D6;border:2px solid #fff;box-shadow:0 6px 16px rgba(111,134,96,.2);cursor:zoom-in;animation:pop .4s ease-out}
+@keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
+.tile img{display:block;width:100%;height:auto}
+.cap{position:absolute;left:0;right:0;bottom:0;padding:20px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.62));color:#fff;font-size:11px;line-height:1.35}
+.x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:99px;background:rgba(0,0,0,.6);color:#fff;align-items:center;justify-content:center;font-size:13px}
+.play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:99px;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center}
+.btn{background:linear-gradient(135deg,var(--sage),var(--sage-d));color:#fff;border-radius:99px;font-weight:600;box-shadow:0 8px 22px rgba(111,134,96,.4);transition:transform .15s}.btn:active{transform:scale(.97)}
+.chip{padding:6px 14px;border-radius:99px;border:1px solid var(--gold);font-size:12px;white-space:nowrap;background:transparent}.chip.on{background:var(--gold);color:#fff}
+.ring{position:absolute;inset:-6px;border-radius:99px;border:2px solid var(--gold);opacity:.6;animation:ring 2.4s ease-out infinite}
+@keyframes ring{0%{transform:scale(.96);opacity:.7}100%{transform:scale(1.12);opacity:0}}
+.spinner{width:64px;height:64px;border-radius:99px;border:5px solid rgba(212,175,55,.25);border-top-color:var(--gold);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.modal{position:fixed;inset:0;z-index:50;display:none}.modal.show{display:flex}
+.inp{width:100%;border:1px solid #d9cfae;border-radius:12px;padding:10px 12px;margin-top:8px;background:#fff;font-size:14px}
+@media(prefers-reduced-motion:reduce){.ring,.tile,.spinner{animation:none}}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 </style>
 </head>
 <body class="min-h-screen">
 
-<!-- Live counter -->
-<div class="text-center py-3 text-sm font-medium tracking-wide" style="background:var(--sage); color:#fff;">
-  <span id="counterText">✨ 0 Memories Captured So Far ✨</span>
-</div>
+<div class="text-center py-3 text-sm font-medium" style="background:var(--sage);color:#fff"><span id="counterText">✨ 0 Memories Captured So Far ✨</span></div>
 
-<main class="max-w-5xl mx-auto px-4 pb-16">
-
-  <!-- Header -->
-  <header class="text-center pt-10 pb-8">
-    <i data-lucide="heart" class="mx-auto mb-3 gold" style="width:28px;height:28px;"></i>
-    <h1 class="serif text-5xl md:text-6xl gold font-semibold leading-tight" id="coupleNames">Emma &amp; James</h1>
-    <p class="serif italic text-2xl mt-2" style="color:var(--sage-dark);">Help us keep every moment</p>
-    <p class="mt-4 text-sm max-w-md mx-auto leading-relaxed opacity-80">
-      Snap a photo or choose one from your phone. It appears in the gallery below for everyone to see.
-    </p>
+<main class="max-w-5xl mx-auto px-4 pb-14">
+  <header class="text-center pt-9 pb-4">
+    <div class="mx-auto w-44 h-60 md:w-52 md:h-72 rounded-t-full overflow-hidden relative" style="background:linear-gradient(160deg,#DCE5D2,#F3E9C6);box-shadow:0 0 0 6px var(--cream),0 0 0 8px var(--gold),0 22px 40px rgba(111,134,96,.3)">
+      <div id="heroFallback" class="absolute inset-0 flex items-center justify-center"><i data-lucide="heart" class="gold" style="width:44px;height:44px"></i></div>
+      <img id="heroImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover">
+    </div>
+    <h1 id="names" class="serif gold text-5xl md:text-6xl font-semibold mt-9 leading-tight"></h1>
+    <p id="wdate" class="serif italic text-2xl" style="color:var(--sage-d)"></p>
+    <p class="mt-3 text-sm max-w-md mx-auto opacity-80 leading-relaxed">Share a photo or a short video, and leave a wish for the couple. Everything appears in the gallery below.</p>
   </header>
 
-  <!-- Main button -->
   <section class="flex flex-col items-center py-4">
-    <div class="relative">
-      <span class="ring"></span>
-      <button id="uploadBtn" type="button" class="cta relative text-white rounded-full px-8 py-5 text-lg font-semibold flex items-center gap-3">
-        <span>📸 Take or Upload Photo</span>
-      </button>
-    </div>
-    <input id="fileInput" type="file" accept="image/*" multiple class="hidden">
-    <p id="statusMsg" class="mt-5 text-sm text-center min-h-[1.25rem]" role="status"></p>
-    <p id="demoNote" class="hidden mt-2 text-xs text-center max-w-sm rounded-lg px-3 py-2" style="background:#F3E9C6;">
-      Preview mode: photos show on this device only until you add your Apps Script URL.
-    </p>
+    <div class="relative"><span class="ring"></span>
+      <button id="uploadBtn" class="btn relative px-8 py-5 text-lg">📸 Take or Upload Photo</button></div>
+    <p id="left" class="mt-4 text-xs opacity-70"></p>
+    <p id="status" class="mt-2 text-sm text-center min-h-[1.25rem]" role="status"></p>
+    <p id="demoNote" class="hidden mt-2 text-xs text-center max-w-sm rounded-lg px-3 py-2" style="background:#F3E9C6">Preview mode: photos show on this device only until you add your Apps Script URL.</p>
   </section>
 
-  <!-- Gallery -->
-  <section class="mt-6">
-    <div class="flex items-center gap-4 mb-6">
-      <div class="flex-1 h-px" style="background:var(--gold); opacity:.5;"></div>
-      <h2 class="serif text-3xl gold">The Gallery</h2>
-      <div class="flex-1 h-px" style="background:var(--gold); opacity:.5;"></div>
-    </div>
-    <p id="emptyMsg" class="text-center text-sm opacity-70 py-10">No photos yet. Be the first to share a memory.</p>
-    <div id="gallery" class="masonry protect"></div>
+  <section class="mt-4">
+    <div class="flex items-center gap-4 mb-4"><div class="flex-1 h-px" style="background:var(--gold);opacity:.5"></div><h2 class="serif text-3xl gold">The Gallery</h2><div class="flex-1 h-px" style="background:var(--gold);opacity:.5"></div></div>
+    <div id="tabs" class="flex justify-center gap-2 mb-5"></div>
+    <p id="empty" class="text-center text-sm opacity-70 py-10">No memories yet. Be the first to share one.</p>
+    <div id="gallery" class="masonry"></div>
   </section>
+
+  <footer class="text-center mt-12 text-xs opacity-60"><button id="adminLink" class="underline">Admin</button></footer>
 </main>
 
-<!-- Loading overlay -->
-<div id="overlay" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center text-center px-8"
-     style="background: rgba(251,246,236,.94); backdrop-filter: blur(6px);" aria-live="assertive">
-  <div class="spinner mb-6"></div>
-  <p class="serif text-3xl gold">Polishing your memory...</p>
-  <p class="mt-2 text-sm">Please don't close this page.</p>
-  <p id="progressText" class="mt-3 text-xs opacity-70"></p>
+<!-- Source chooser -->
+<div id="sheet" class="modal items-end justify-center" style="background:rgba(0,0,0,.45)">
+  <div class="w-full max-w-md rounded-t-3xl p-5 space-y-3" style="background:var(--cream)">
+    <button class="btn w-full py-4" onclick="pick('inCam')">📷 Open Camera (Photo)</button>
+    <button class="btn w-full py-4" onclick="pick('inVid')">🎥 Record Video (max 30s)</button>
+    <button class="w-full py-4 rounded-full border border-[#D4AF37]" onclick="pick('inGal')">🖼️ Choose from Gallery</button>
+    <button class="w-full py-2 text-sm opacity-70" onclick="closeM('sheet')">Cancel</button>
+  </div>
+</div>
+<input id="inCam" type="file" accept="image/*" capture="environment" class="hidden">
+<input id="inVid" type="file" accept="video/*" capture="environment" class="hidden">
+<input id="inGal" type="file" accept="image/*,video/*" class="hidden">
+
+<!-- Composer -->
+<div id="composer" class="modal items-end md:items-center justify-center" style="background:rgba(0,0,0,.5)">
+  <div class="w-full md:max-w-md max-h-[94vh] overflow-y-auto rounded-t-3xl md:rounded-3xl p-4" style="background:var(--cream)">
+    <div id="prevBox" class="rounded-2xl overflow-hidden flex justify-center bg-black/5"></div>
+    <div id="photoTools">
+      <p class="text-xs mt-3 mb-1 opacity-70">Filter (optional)</p><div id="filters" class="flex gap-2 overflow-x-auto pb-1"></div>
+      <p class="text-xs mt-2 mb-1 opacity-70">Story template (optional)</p><div id="tpls" class="flex gap-2 overflow-x-auto pb-1"></div>
+    </div>
+    <input id="gName" class="inp" maxlength="40" placeholder="Your name (Nama anda)">
+    <textarea id="gCap" class="inp" rows="2" maxlength="140" placeholder="Write a wish for the couple (Tulis ucapan)..."></textarea>
+    <button id="shareBtn" class="btn w-full py-3 mt-3">Share to Gallery</button>
+    <button id="storyBtn" class="hidden w-full py-2 mt-2 text-sm rounded-full border border-[#D4AF37]">Save / Share as Story (9:16)</button>
+    <button class="w-full py-2 mt-1 text-sm opacity-70" onclick="closeM('composer')">Cancel</button>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lb" class="modal flex-col" style="background:rgba(0,0,0,.95)">
+  <div class="flex justify-between items-center p-3 text-white gap-3">
+    <div id="lbCap" class="text-sm leading-snug"></div>
+    <div class="flex gap-2 shrink-0"><button id="lbSave" class="btn px-4 py-2 text-sm">⬇ Save</button><button onclick="closeM('lb');$('lbStage').replaceChildren()" class="px-3 text-2xl" aria-label="Close">✕</button></div>
+  </div>
+  <div id="lbStage" class="flex-1 flex items-center justify-center overflow-hidden min-h-0"></div>
+</div>
+
+<div id="overlay" class="modal flex-col items-center justify-center text-center px-8" style="background:rgba(251,246,236,.95);backdrop-filter:blur(6px)">
+  <div class="spinner mb-6"></div><p class="serif text-3xl gold">Polishing your memory...</p><p class="mt-2 text-sm">Please don't close this page.</p>
 </div>
 
 <script>
-/* =====================================================================
-   SETUP (3 steps, no coding needed)
-   1. Go to script.google.com > New project. Delete everything in the editor.
-   2. Paste the BACKEND CODE below (between the two lines) and click Save.
-   3. Deploy > New deployment > type: Web app > Execute as: Me >
-      Who has access: Anyone > Deploy. Authorize when asked, copy the
-      "Web app URL" and paste it into DEPLOYED_SCRIPT_URL further down.
-      (Any time you edit the backend code, use Deploy > Manage deployments >
-      edit > New version, so the URL keeps working.)
-
-   ---------------- BACKEND CODE: Google Apps Script ----------------
-   const FOLDER_NAME = "Wedding Memories";   // Created in your Google Drive automatically
-
-   function getFolder() {
-     const it = DriveApp.getFoldersByName(FOLDER_NAME);
-     return it.hasNext() ? it.next() : DriveApp.createFolder(FOLDER_NAME);
-   }
-
-   function photoUrl(id) {
-     return "https://drive.google.com/thumbnail?id=" + id + "&sz=w1200";
-   }
-
-   function reply(obj) {
-     return ContentService.createTextOutput(JSON.stringify(obj))
-       .setMimeType(ContentService.MimeType.JSON);
-   }
-
-   // Receives a Base64 image, saves it in the folder, returns its URL
-   function doPost(e) {
-     try {
-       const data = JSON.parse(e.postData.contents);
-       const blob = Utilities.newBlob(
-         Utilities.base64Decode(data.image),
-         data.mimeType || "image/jpeg",
-         "memory_" + Date.now() + ".jpg"
-       );
-       const file = getFolder().createFile(blob);
-       file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-       return reply({ success: true, id: file.getId(), url: photoUrl(file.getId()) });
-     } catch (err) {
-       return reply({ success: false, error: String(err) });
-     }
-   }
-
-   // Returns the newest photos so every guest sees the live gallery
-   function doGet() {
-     const files = getFolder().getFiles();
-     const list = [];
-     while (files.hasNext()) {
-       const f = files.next();
-       list.push({ id: f.getId(), time: f.getDateCreated().getTime() });
-     }
-     list.sort(function (a, b) { return b.time - a.time; });
-     return reply({
-       success: true,
-       photos: list.slice(0, 300).map(function (p) { return { id: p.id, url: photoUrl(p.id) }; })
-     });
-   }
-   ---------------- END OF BACKEND CODE ----------------
-
-   The bride and groom download the originals straight from the
-   "Wedding Memories" folder in Google Drive. The website has no download button.
-   ===================================================================== */
-
-/* ========= YOUR SETTINGS ========= */
+/* ==================== YOUR SETTINGS ==================== */
 const DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4kw3DRR4c3pu1Cx9XDwjvbR03k0wg1x_RywAV2CBhqVqHawK-QBP7CBWQpygokU9IEg/exec";
-const COUPLE_NAMES = "Aida & Emir";   // Change to your names
-const MAX_IMAGE_SIDE = 1600;           // Photos are resized to this size before upload (faster on mobile data)
-const REFRESH_SECONDS = 20;            // How often the gallery checks for new photos from other guests
-/* ================================= */
+const COUPLE_NAMES = "Emir & Aida";        // change to your names
+const WEDDING_DATE = "07 November 2026";    // change to your date
+const HERO_IMAGE   = "test.jpg";            // couple photo saved next to index.html (leave "" for none)
+const MAX_UPLOADS  = 5;                     // display only; the real limit is MAX_UPLOADS in Code.gs
+const MAX_VIDEO_SEC = 30;                   // longest video allowed
+const MAX_VIDEO_MB  = 20;                   // biggest video file allowed (Apps Script can't take huge files)
+const MAX_SIDE = 1600, REFRESH_SECONDS = 30;
+/* ======================================================= */
 
-const IS_DEMO = DEPLOYED_SCRIPT_URL.indexOf("YOUR_APPS_SCRIPT_URL_HERE") !== -1;
 const $ = (id) => document.getElementById(id);
-const seen = new Set();
+const DEMO = DEPLOYED_SCRIPT_URL.includes("YOUR_APPS_SCRIPT_URL_HERE");
+const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
+const device = ls("wd_id") || (() => { const i = Math.random().toString(36).slice(2) + Date.now().toString(36); ls("wd_id", i); return i; })();
+let pin = sessionStorage.getItem("wd_pin") || "", used = +ls("wd_used") || 0, limit = MAX_UPLOADS, tab = "all", cur = null;
+const items = new Map(), tiles = new Map();
+const thumb = (id, s) => `https://drive.google.com/thumbnail?id=${id}&sz=w${s}`;
+const openM = (id) => $(id).classList.add("show"), closeM = (id) => $(id).classList.remove("show");
+const say = (m, err) => { $("status").style.color = err ? "#B4533C" : "var(--sage-d)"; $("status").textContent = m; };
+const api = async (b) => (await fetch(DEPLOYED_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(b) })).json();
+const dl = (href, name) => { const a = document.createElement("a"); a.href = href; a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
 
-document.getElementById("coupleNames").textContent = COUPLE_NAMES;
-document.title = COUPLE_NAMES + " - Wedding Memories";
-if (IS_DEMO) $("demoNote").classList.remove("hidden");
+/* ---------- Header ---------- */
+$("names").textContent = COUPLE_NAMES; $("wdate").textContent = WEDDING_DATE; document.title = COUPLE_NAMES;
+if (DEMO) $("demoNote").classList.remove("hidden");
+if (HERO_IMAGE) { const h = $("heroImg"); h.onload = () => { h.classList.remove("hidden"); $("heroFallback").style.display = "none"; }; h.src = HERO_IMAGE; }
 lucide.createIcons();
 
-/* ---- Block right-click, long-press menu and dragging on the gallery ---- */
-["contextmenu", "dragstart", "selectstart"].forEach((evt) => {
-  $("gallery").addEventListener(evt, (e) => e.preventDefault());
-});
-
-/* ---- Counter ---- */
-function updateCounter() {
-  $("counterText").textContent = "✨ " + seen.size + " Memories Captured So Far ✨";
-  $("emptyMsg").classList.toggle("hidden", seen.size > 0);
+/* ---------- Gallery ---------- */
+function mkTile(p) {
+  const el = document.createElement("div"); el.className = "tile"; el.style.minHeight = "110px";
+  const im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = p.local || thumb(p.id, 800); im.onerror = () => { im.style.display = "none"; };
+  el.append(im);
+  if (p.k === "video") { const b = document.createElement("div"); b.className = "play"; b.textContent = "▶"; el.append(b); }
+  if (p.n || p.c) { const c = document.createElement("div"); c.className = "cap"; const n = document.createElement("b"); n.textContent = p.n || ""; c.append(n); if (p.c) c.append(document.createElement("br"), p.c); el.append(c); }
+  const x = document.createElement("button"); x.className = "x"; x.textContent = "✕"; x.setAttribute("aria-label", "Delete");
+  x.onclick = (e) => { e.stopPropagation(); del(p.id); };
+  el.append(x); el.onclick = () => openLb(p.id);
+  return el;
 }
-
-/* ---- Add a photo to the masonry grid ---- */
-function addPhoto(id, url, fallbackUrl, atTop) {
-  if (seen.has(id)) return;
-  seen.add(id);
-  const tile = document.createElement("div");
-  tile.className = "tile relative";
-  const img = document.createElement("img");
-  img.alt = "Wedding memory";
-  img.loading = "lazy";
-  img.draggable = false;
-  img.referrerPolicy = "no-referrer";
-  img.src = url;
-  if (fallbackUrl) img.onerror = function () { img.onerror = null; img.src = fallbackUrl; };
-  const shield = document.createElement("div");
-  shield.className = "shield";
-  tile.appendChild(img);
-  tile.appendChild(shield);
-  const g = $("gallery");
-  if (atTop && g.firstChild) g.insertBefore(tile, g.firstChild); else g.appendChild(tile);
-  updateCounter();
+function render() {
+  tiles.forEach((el, id) => { if (!items.has(id)) { el.remove(); tiles.delete(id); } });
+  [...items.values()].sort((a, b) => b.t - a.t).forEach((p) => {
+    let el = tiles.get(p.id); if (!el) { el = mkTile(p); tiles.set(p.id, el); }
+    el.style.display = (tab === "all" || tab === p.k) ? "" : "none";
+    el.querySelector(".x").style.display = (p.mine || pin) ? "flex" : "none";
+    $("gallery").appendChild(el);
+  });
+  $("counterText").textContent = `✨ ${items.size} Memories Captured So Far ✨`;
+  $("empty").classList.toggle("hidden", items.size > 0);
+  $("left").textContent = used >= limit ? "Upload limit reached on this device" : `${limit - used} of ${limit} uploads left on this device`;
+  $("adminLink").textContent = pin ? "Exit admin mode" : "Admin";
 }
-
-/* ---- Load existing photos from Google Drive ---- */
-async function loadGallery() {
-  if (IS_DEMO) return;
+async function load() {
+  if (DEMO) return;
   try {
-    const res = await fetch(DEPLOYED_SCRIPT_URL, { method: "GET" });
-    const data = await res.json();
-    if (data && data.success && Array.isArray(data.photos)) {
-      // Photos arrive newest first. Add only unseen ones; new arrivals go to the top.
-      const fresh = data.photos.filter((p) => !seen.has(p.id));
-      const firstLoad = seen.size === 0;
-      (firstLoad ? fresh : fresh.slice().reverse()).forEach((p) => addPhoto(p.id, p.url, null, !firstLoad));
-    }
-  } catch (err) { /* offline or sleeping: try again at next refresh */ }
+    const r = await (await fetch(DEPLOYED_SCRIPT_URL + "?device=" + encodeURIComponent(device))).json();
+    if (!r.success) return;
+    used = r.used; limit = r.limit;
+    const ids = new Set(r.photos.map((p) => p.id));
+    items.forEach((v, k) => { if (!ids.has(k)) items.delete(k); });
+    r.photos.forEach((p) => items.set(p.id, { ...items.get(p.id), ...p }));
+    render();
+  } catch (e) {}
 }
-
-/* ---- Resize + convert image to Base64 (JPEG) ---- */
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const objUrl = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      let w = img.naturalWidth, h = img.naturalHeight;
-      const scale = Math.min(1, MAX_IMAGE_SIDE / Math.max(w, h));
-      w = Math.round(w * scale); h = Math.round(h * scale);
-      const canvas = document.createElement("canvas");
-      canvas.width = w; canvas.height = h;
-      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
-      URL.revokeObjectURL(objUrl);
-      resolve({ dataUrl: dataUrl, base64: dataUrl.split(",")[1] });
-    };
-    img.onerror = () => { URL.revokeObjectURL(objUrl); reject(new Error("This photo format isn't supported. Please try another photo.")); };
-    img.src = objUrl;
-  });
+async function del(id) {
+  if (!confirm("Delete this memory?")) return;
+  if (!DEMO) { try { const r = await api({ action: "delete", id, device, pin }); if (!r.success) return alert(r.error || "Could not delete"); } catch (e) { return alert("Network error. Try again."); } }
+  items.delete(id); render();
 }
+$("tabs").replaceChildren(...[["all", "All"], ["photo", "Photos"], ["video", "Videos"]].map(([v, l]) => {
+  const b = document.createElement("button"); b.className = "chip" + (v === "all" ? " on" : ""); b.textContent = l;
+  b.onclick = () => { tab = v; [...$("tabs").children].forEach((c) => c.classList.toggle("on", c === b)); render(); }; return b;
+}));
 
-/* ---- Upload one photo ---- */
-async function uploadOne(file) {
-  const { dataUrl, base64 } = await fileToBase64(file);
+/* ---------- Admin ---------- */
+$("adminLink").onclick = async () => {
+  if (pin) { pin = ""; sessionStorage.removeItem("wd_pin"); return render(); }
+  const p = prompt("Admin PIN"); if (!p) return;
+  if (!DEMO) { try { if (!(await api({ action: "admin", pin: p })).success) return alert("Wrong PIN"); } catch (e) { return alert("Network error"); } }
+  pin = p; sessionStorage.setItem("wd_pin", p); render();
+};
 
-  if (IS_DEMO) {   // Preview mode: show locally only
-    addPhoto("local-" + Date.now() + Math.random(), dataUrl, null, true);
-    return;
-  }
-
-  // text/plain avoids a browser preflight request, which Apps Script doesn't support
-  const res = await fetch(DEPLOYED_SCRIPT_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" },
-    body: JSON.stringify({ image: base64, mimeType: "image/jpeg", filename: file.name || "photo.jpg" })
-  });
-  const data = await res.json();
-  if (!data.success) throw new Error(data.error || "Upload failed");
-  addPhoto(data.id || data.url, data.url, dataUrl, true);   // dataUrl is a backup while Drive finishes processing
+/* ---------- Lightbox + zoom ---------- */
+function zoomable(im) {
+  let s = 1, x = 0, y = 0, pts = new Map(), d0 = 0, s0 = 1, moved = false, last = 0;
+  const ap = () => { im.style.transform = `translate(${x}px,${y}px) scale(${s})`; };
+  const pd = () => { const [a, b] = [...pts.values()]; return Math.hypot(a[0] - b[0], a[1] - b[1]); };
+  const reset = () => { s = 1; x = y = 0; ap(); };
+  im.style.touchAction = "none";
+  im.onpointerdown = (e) => { im.setPointerCapture(e.pointerId); pts.set(e.pointerId, [e.clientX, e.clientY]); moved = false; if (pts.size === 2) { d0 = pd(); s0 = s; } };
+  im.onpointermove = (e) => {
+    const p = pts.get(e.pointerId); if (!p) return;
+    if (pts.size === 2) { pts.set(e.pointerId, [e.clientX, e.clientY]); s = Math.min(5, Math.max(1, s0 * pd() / d0)); moved = true; }
+    else { if (Math.abs(e.clientX - p[0]) + Math.abs(e.clientY - p[1]) > 2) moved = true; if (s > 1) { x += e.clientX - p[0]; y += e.clientY - p[1]; } pts.set(e.pointerId, [e.clientX, e.clientY]); }
+    ap();
+  };
+  im.onpointerup = im.onpointercancel = (e) => {
+    pts.delete(e.pointerId); if (s < 1.05) reset();
+    if (!moved && !pts.size) { const n = Date.now(); if (n - last < 300) { if (s > 1) reset(); else { s = 2.5; ap(); } } last = n; }
+  };
+  im.onwheel = (e) => { e.preventDefault(); s = Math.min(5, Math.max(1, s - e.deltaY / 300)); if (s === 1) x = y = 0; ap(); };
 }
-
-/* ---- Button + file handling ---- */
-$("uploadBtn").addEventListener("click", () => $("fileInput").click());
-
-$("fileInput").addEventListener("change", async (e) => {
-  const files = Array.from(e.target.files || []);
-  e.target.value = "";           // lets the same photo be chosen again
-  if (!files.length) return;
-
-  $("statusMsg").textContent = "";
-  $("overlay").classList.remove("hidden");
-  let ok = 0, failed = 0;
-
-  for (let i = 0; i < files.length; i++) {
-    $("progressText").textContent = files.length > 1 ? "Photo " + (i + 1) + " of " + files.length : "";
-    try { await uploadOne(files[i]); ok++; }
-    catch (err) { failed++; console.error(err); }
-  }
-
-  $("overlay").classList.add("hidden");
-  if (failed === 0) {
-    $("statusMsg").style.color = "var(--sage-dark)";
-    $("statusMsg").textContent = ok > 1 ? "Thank you! " + ok + " memories added 💛" : "Thank you! Your memory was added 💛";
-    document.getElementById("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+function openLb(id) {
+  const p = items.get(id); if (!p) return;
+  let node;
+  if (p.k === "video") {
+    node = document.createElement("iframe"); node.src = `https://drive.google.com/file/d/${id}/preview`; node.allow = "autoplay; fullscreen"; node.className = "w-full h-full border-0";
   } else {
-    $("statusMsg").style.color = "#B4533C";
-    $("statusMsg").textContent = failed + " photo(s) didn't upload. Check your connection and try again.";
+    node = new Image(); node.src = p.local || thumb(id, 2000); node.draggable = false; node.style.cssText = "max-width:100%;max-height:100%;object-fit:contain"; zoomable(node);
   }
-});
+  $("lbStage").replaceChildren(node);
+  $("lbCap").textContent = [p.n, p.c].filter(Boolean).join(": ");
+  $("lbSave").onclick = () => p.local && p.k === "photo" ? dl(p.local, "memory.jpg") : dl(`https://drive.google.com/uc?export=download&id=${id}`, "memory");
+  openM("lb");
+}
 
-/* ---- Start ---- */
-updateCounter();
-loadGallery();
-setInterval(loadGallery, REFRESH_SECONDS * 1000);
+/* ---------- Photo processing: filters + story templates ---------- */
+const FILTERS = {
+  none: null,
+  warm: (r, g, b) => [r * 1.08 + 10, g * 1.02 + 4, b * .9],
+  bw: (r, g, b) => { const y = .3 * r + .59 * g + .11 * b; return [y, y, y]; },
+  sepia: (r, g, b) => [.393 * r + .769 * g + .189 * b, .349 * r + .686 * g + .168 * b, .272 * r + .534 * g + .131 * b],
+  soft: (r, g, b) => [r * .9 + 35, g * .9 + 30, b * .9 + 32]
+};
+function renderPhoto(img, max, fl) {
+  const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
+  const c = document.createElement("canvas"); c.width = w; c.height = h;
+  const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0, w, h);
+  const f = FILTERS[fl];
+  if (f) { const d = x.getImageData(0, 0, w, h), a = d.data; for (let i = 0; i < a.length; i += 4) { const o = f(a[i], a[i + 1], a[i + 2]); a[i] = o[0]; a[i + 1] = o[1]; a[i + 2] = o[2]; } x.putImageData(d, 0, 0); }
+  return c;
+}
+function wrap(x, t, cx, y, mw, lh) {
+  let l = ""; for (const s of t.split(" ")) { const n = l ? l + " " + s : s; if (x.measureText(n).width > mw && l) { x.fillText(l, cx, y); y += lh; l = s; } else l = n; } x.fillText(l, cx, y);
+}
+async function renderStory(img, fl, tpl) {
+  await Promise.all(['600 80px "Cormorant Garamond"', 'italic 500 40px "Cormorant Garamond"', '500 30px Montserrat'].map((f) => document.fonts.load(f)));
+  const p = renderPhoto(img, 1400, fl), c = document.createElement("canvas"); c.width = 1080; c.height = 1920;
+  const x = c.getContext("2d"), name = $("gName").value.trim(), cap = $("gCap").value.trim(), S = '"Cormorant Garamond",Georgia,serif';
+  const cover = (dx, dy, dw, dh) => { const r = Math.max(dw / p.width, dh / p.height), sw = dw / r, sh = dh / r; x.drawImage(p, (p.width - sw) / 2, (p.height - sh) / 2, sw, sh, dx, dy, dw, dh); };
+  x.textAlign = "center";
+  if (tpl === "gold") {
+    x.fillStyle = "#FBF6EC"; x.fillRect(0, 0, 1080, 1920);
+    x.strokeStyle = "#D4AF37"; x.lineWidth = 6; x.strokeRect(40, 40, 1000, 1840); x.lineWidth = 2; x.strokeRect(62, 62, 956, 1796);
+    x.fillStyle = "#D4AF37"; x.font = `600 100px ${S}`; x.fillText(COUPLE_NAMES, 540, 230);
+    x.fillStyle = "#6F8660"; x.font = `italic 500 44px ${S}`; x.fillText(WEDDING_DATE, 540, 300);
+    cover(110, 360, 860, 1080);
+    x.fillStyle = "#4A4A3F"; x.font = `italic 500 56px ${S}`; if (cap) wrap(x, cap, 540, 1540, 860, 68);
+    x.font = "500 32px Montserrat"; x.fillStyle = "#6F8660"; if (name) x.fillText("from " + name, 540, 1790);
+  } else if (tpl === "polaroid") {
+    x.fillStyle = "#9CAF88"; x.fillRect(0, 0, 1080, 1920);
+    x.fillStyle = "#fff"; x.font = `600 96px ${S}`; x.fillText(COUPLE_NAMES, 540, 190);
+    x.save(); x.translate(540, 1000); x.rotate(-.04); x.shadowColor = "rgba(0,0,0,.3)"; x.shadowBlur = 40; x.fillStyle = "#fff"; x.fillRect(-420, -640, 840, 1240); x.shadowBlur = 0;
+    cover(-380, -600, 760, 900);
+    x.fillStyle = "#4A4A3F"; x.font = `italic 500 52px ${S}`; if (cap) wrap(x, cap, 0, 400, 740, 62);
+    x.font = "500 30px Montserrat"; x.fillStyle = "#6F8660"; if (name) x.fillText("from " + name, 0, 555);
+    x.restore(); x.fillStyle = "#fff"; x.font = `italic 500 48px ${S}`; x.fillText(WEDDING_DATE, 540, 1820);
+  } else {
+    cover(0, 0, 1080, 1920);
+    const g = x.createLinearGradient(0, 1100, 0, 1920); g.addColorStop(0, "rgba(0,0,0,0)"); g.addColorStop(1, "rgba(0,0,0,.75)"); x.fillStyle = g; x.fillRect(0, 1100, 1080, 820);
+    x.shadowColor = "rgba(0,0,0,.5)"; x.shadowBlur = 20; x.fillStyle = "#fff"; x.font = `600 100px ${S}`; x.fillText(COUPLE_NAMES, 540, 190);
+    x.fillStyle = "#D4AF37"; x.fillRect(440, 1560, 200, 4); x.fillStyle = "#fff"; x.font = `italic 500 58px ${S}`; if (cap) wrap(x, cap, 540, 1660, 880, 70);
+    x.font = "500 32px Montserrat"; if (name) x.fillText("from " + name + "  |  " + WEDDING_DATE, 540, 1840);
+  }
+  return c;
+}
+
+/* ---------- Upload flow ---------- */
+function chips(box, opts, key) {
+  box.replaceChildren(...opts.map(([v, l]) => {
+    const b = document.createElement("button"); b.className = "chip" + (cur[key] === v ? " on" : ""); b.textContent = l;
+    b.onclick = () => { cur[key] = v; chips(box, opts, key); $("storyBtn").classList.toggle("hidden", cur.tpl === "none"); drawPrev(); }; return b;
+  }));
+}
+async function drawPrev() {
+  if (!cur || cur.kind !== "photo") return;
+  const c = cur.tpl === "none" ? renderPhoto(cur.img, 700, cur.filter) : await renderStory(cur.img, cur.filter, cur.tpl);
+  c.style.cssText = "max-height:46vh;width:auto;max-width:100%"; $("prevBox").replaceChildren(c);
+}
+let tm; ["gName", "gCap"].forEach((i) => { $(i).oninput = () => { clearTimeout(tm); tm = setTimeout(() => { if (cur && cur.tpl !== "none") drawPrev(); }, 350); }; });
+const pick = (id) => { closeM("sheet"); $(id).click(); };
+$("uploadBtn").onclick = () => { if (used >= limit) return say(`You've reached the limit of ${limit} uploads on this device.`, true); say(""); openM("sheet"); };
+["inCam", "inVid", "inGal"].forEach((id) => { $(id).onchange = (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) start(f); }; });
+
+async function start(f) {
+  const kind = f.type.startsWith("video") ? "video" : f.type.startsWith("image") ? "photo" : null;
+  if (!kind) return say("Please choose a photo or a video.", true);
+  $("gName").value = ls("wd_name") || ""; $("gCap").value = "";
+  if (kind === "video") {
+    if (DEMO) return say("Videos work once your Apps Script URL is added.", true);
+    if (f.size > MAX_VIDEO_MB * 1048576) return say(`Video is too large (max ${MAX_VIDEO_MB} MB). Try recording at 720p.`, true);
+    const u = URL.createObjectURL(f), v = document.createElement("video");
+    v.src = u; v.controls = true; v.muted = true; v.playsInline = true; v.style.cssText = "max-height:46vh;max-width:100%";
+    await new Promise((r) => { v.onloadedmetadata = r; v.onerror = r; });
+    if (v.duration > MAX_VIDEO_SEC + .5) { URL.revokeObjectURL(u); return say(`Video is too long (max ${MAX_VIDEO_SEC} seconds).`, true); }
+    cur = { f, kind }; $("prevBox").replaceChildren(v); $("photoTools").classList.add("hidden"); $("storyBtn").classList.add("hidden");
+  } else {
+    const img = new Image(); const u = URL.createObjectURL(f);
+    try { await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = u; }); } catch (e) { return say("This photo format isn't supported. Please try another.", true); }
+    cur = { f, kind, img, filter: "none", tpl: "none" };
+    $("photoTools").classList.remove("hidden"); $("storyBtn").classList.add("hidden");
+    chips($("filters"), [["none", "Original"], ["warm", "Warm"], ["bw", "B&W"], ["sepia", "Sepia"], ["soft", "Soft"]], "filter");
+    chips($("tpls"), [["none", "None"], ["gold", "Gold Frame"], ["polaroid", "Polaroid"], ["full", "Full Photo"]], "tpl");
+    drawPrev();
+  }
+  openM("composer");
+}
+$("storyBtn").onclick = async () => {
+  const c = await renderStory(cur.img, cur.filter, cur.tpl);
+  c.toBlob(async (b) => {
+    const f = new File([b], "wedding-story.png", { type: "image/png" });
+    if (navigator.canShare && navigator.canShare({ files: [f] })) { try { await navigator.share({ files: [f] }); return; } catch (e) { if (e.name === "AbortError") return; } }
+    dl(URL.createObjectURL(b), "wedding-story.png");
+  });
+};
+$("shareBtn").onclick = async () => {
+  if (used >= limit) return say(`You've reached the limit of ${limit} uploads on this device.`, true);
+  const name = $("gName").value.trim(), caption = $("gCap").value.trim(); ls("wd_name", name);
+  closeM("composer"); openM("overlay");
+  try {
+    let data, mime, local;
+    if (cur.kind === "photo") { local = renderPhoto(cur.img, MAX_SIDE, cur.filter).toDataURL("image/jpeg", .85); data = local.split(",")[1]; mime = "image/jpeg"; }
+    else { const d = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(cur.f); }); data = d.split(",")[1]; mime = cur.f.type || "video/mp4"; }
+    let item;
+    if (DEMO) { used++; ls("wd_used", used); item = { id: "demo" + Date.now(), k: "photo", n: name, c: caption, t: Date.now(), mine: true, local }; }
+    else {
+      const r = await api({ action: "upload", device, kind: cur.kind, mime, name, caption, data });
+      if (!r.success) throw new Error(r.error || "Upload failed");
+      used = r.used; item = { id: r.id, k: cur.kind, n: name, c: caption, t: Date.now(), mine: true, local };
+    }
+    items.set(item.id, item); render(); say("Thank you! Your memory was added 💛");
+    $("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
+  } catch (e) { say(e.message || "Upload failed. Check your connection and try again.", true); }
+  closeM("overlay"); cur = null;
+};
+
+render(); load(); setInterval(load, REFRESH_SECONDS * 1000);
 </script>
 </body>
 </html>
