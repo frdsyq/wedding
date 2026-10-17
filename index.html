@@ -29,6 +29,7 @@ body{background:var(--cream);color:#4A4A3F;font-family:Montserrat,sans-serif;pad
 .inp{width:100%;border:1px solid #d9cfae;border-radius:12px;padding:10px 12px;margin-top:8px;background:#fff;font-size:14px}
 @media(prefers-reduced-motion:reduce){.ring,.tile,.spinner{animation:none}}
 button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+#shutter{width:68px;height:68px;border-radius:99px;background:#fff;border:4px solid #000;box-shadow:0 0 0 4px #fff}
 </style>
 </head>
 <body class="min-h-screen">
@@ -67,7 +68,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <!-- Source chooser -->
 <div id="sheet" class="modal items-end justify-center" style="background:rgba(0,0,0,.45)">
   <div class="w-full max-w-md rounded-t-3xl p-5 space-y-3" style="background:var(--cream)">
-    <button class="btn w-full py-4" onclick="pick('inCam')">📷 Open Camera (Photo)</button>
+    <button class="btn w-full py-4" onclick="openCam()">📷 Open Camera (Photo + Wedding Frame)</button>
     <button class="btn w-full py-4" onclick="pick('inVid')">🎥 Record Video (max 30s)</button>
     <button class="w-full py-4 rounded-full border border-[#D4AF37]" onclick="pick('inGal')">🖼️ Choose from Gallery</button>
     <button class="w-full py-2 text-sm opacity-70" onclick="closeM('sheet')">Cancel</button>
@@ -77,11 +78,22 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <input id="inVid" type="file" accept="video/*" capture="environment" class="hidden">
 <input id="inGal" type="file" accept="image/*,video/*" class="hidden">
 
+<!-- Camera with wedding frame -->
+<div id="cam" class="modal flex-col items-center" style="background:#000">
+  <div class="w-full flex justify-between items-center p-3 text-white"><button onclick="closeCam()" class="text-2xl px-2" aria-label="Close camera">✕</button><button id="camFlip" class="text-2xl px-2" aria-label="Switch camera">🔄</button></div>
+  <div class="relative overflow-hidden flex-none bg-neutral-900" style="width:min(100vw,calc((100dvh - 150px) * 9 / 16));aspect-ratio:9/16">
+    <video id="camVid" playsinline muted autoplay class="absolute inset-0 w-full h-full object-cover"></video>
+    <img id="camFrame" alt="" class="absolute inset-0 w-full h-full pointer-events-none">
+  </div>
+  <div class="flex-1 flex items-center justify-center"><button id="shutter" aria-label="Take photo"></button></div>
+</div>
+
 <!-- Composer -->
 <div id="composer" class="modal items-end md:items-center justify-center" style="background:rgba(0,0,0,.5)">
   <div class="w-full md:max-w-md max-h-[94vh] overflow-y-auto rounded-t-3xl md:rounded-3xl p-4" style="background:var(--cream)">
     <div id="prevBox" class="rounded-2xl overflow-hidden flex justify-center bg-black/5"></div>
     <div id="photoTools">
+      <div id="frameRow" class="hidden"><p class="text-xs mt-3 mb-1 opacity-70">Wedding frame</p><div id="frameChips" class="flex gap-2 pb-1"></div></div>
       <p class="text-xs mt-3 mb-1 opacity-70">Filter (optional)</p><div id="filters" class="flex gap-2 overflow-x-auto pb-1"></div>
       <p class="text-xs mt-2 mb-1 opacity-70">Story template (optional)</p><div id="tpls" class="flex gap-2 overflow-x-auto pb-1"></div>
     </div>
@@ -108,10 +120,11 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 
 <script>
 /* ==================== YOUR SETTINGS ==================== */
-const DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4kw3DRR4c3pu1Cx9XDwjvbR03k0wg1x_RywAV2CBhqVqHawK-QBP7CBWQpygokU9IEg/exec";
-const COUPLE_NAMES = "Emir & Aida";        // change to your names
-const WEDDING_DATE = "07 November 2026";    // change to your date
-const HERO_IMAGE   = "test.jpg";            // couple photo saved next to index.html (leave "" for none)
+const DEPLOYED_SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
+const COUPLE_NAMES = "Aida & Emir";         // change to your names
+const WEDDING_DATE = "7 November 2026";    // change to your date
+const HERO_IMAGE   = "hero.jpg";            // couple photo saved next to index.html (leave "" for none)
+const FRAME_IMAGE  = "frame.png";           // transparent wedding frame applied to camera photos (leave "" for none)
 const MAX_UPLOADS  = 5;                     // display only; the real limit is MAX_UPLOADS in Code.gs
 const MAX_VIDEO_SEC = 30;                   // longest video allowed
 const MAX_VIDEO_MB  = 20;                   // biggest video file allowed (Apps Script can't take huge files)
@@ -215,7 +228,10 @@ function openLb(id) {
   const p = items.get(id); if (!p) return;
   let node;
   if (p.k === "video") {
-    node = document.createElement("iframe"); node.src = `https://drive.google.com/file/d/${id}/preview`; node.allow = "autoplay; fullscreen"; node.className = "w-full h-full border-0";
+    node = document.createElement("video"); node.controls = true; node.playsInline = true; node.preload = "metadata";
+    node.poster = p.local || thumb(id, 1200); node.style.cssText = "max-width:100%;max-height:100%";
+    node.src = `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
+    node.onerror = () => { const f = document.createElement("iframe"); f.src = `https://drive.google.com/file/d/${id}/preview`; f.allow = "autoplay; fullscreen"; f.className = "w-full h-full border-0"; $("lbStage").replaceChildren(f); };
   } else {
     node = new Image(); node.src = p.local || thumb(id, 2000); node.draggable = false; node.style.cssText = "max-width:100%;max-height:100%;object-fit:contain"; zoomable(node);
   }
@@ -233,12 +249,13 @@ const FILTERS = {
   sepia: (r, g, b) => [.393 * r + .769 * g + .189 * b, .349 * r + .686 * g + .168 * b, .272 * r + .534 * g + .131 * b],
   soft: (r, g, b) => [r * .9 + 35, g * .9 + 30, b * .9 + 32]
 };
-function renderPhoto(img, max, fl) {
+function renderPhoto(img, max, fl, frame) {
   const k = Math.min(1, max / Math.max(img.naturalWidth, img.naturalHeight)), w = Math.round(img.naturalWidth * k), h = Math.round(img.naturalHeight * k);
   const c = document.createElement("canvas"); c.width = w; c.height = h;
   const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(img, 0, 0, w, h);
   const f = FILTERS[fl];
   if (f) { const d = x.getImageData(0, 0, w, h), a = d.data; for (let i = 0; i < a.length; i += 4) { const o = f(a[i], a[i + 1], a[i + 2]); a[i] = o[0]; a[i + 1] = o[1]; a[i + 2] = o[2]; } x.putImageData(d, 0, 0); }
+  if (frame && frameOK) x.drawImage(frameImg, 0, 0, w, h);
   return c;
 }
 function wrap(x, t, cx, y, mw, lh) {
@@ -285,7 +302,7 @@ function chips(box, opts, key) {
 }
 async function drawPrev() {
   if (!cur || cur.kind !== "photo") return;
-  const c = cur.tpl === "none" ? renderPhoto(cur.img, 700, cur.filter) : await renderStory(cur.img, cur.filter, cur.tpl);
+  const c = cur.tpl === "none" ? renderPhoto(cur.img, 700, cur.filter, cur.frame) : await renderStory(cur.img, cur.filter, cur.tpl);
   c.style.cssText = "max-height:46vh;width:auto;max-width:100%"; $("prevBox").replaceChildren(c);
 }
 let tm; ["gName", "gCap"].forEach((i) => { $(i).oninput = () => { clearTimeout(tm); tm = setTimeout(() => { if (cur && cur.tpl !== "none") drawPrev(); }, 350); }; });
@@ -308,13 +325,19 @@ async function start(f) {
   } else {
     const img = new Image(); const u = URL.createObjectURL(f);
     try { await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = u; }); } catch (e) { return say("This photo format isn't supported. Please try another.", true); }
-    cur = { f, kind, img, filter: "none", tpl: "none" };
-    $("photoTools").classList.remove("hidden"); $("storyBtn").classList.add("hidden");
-    chips($("filters"), [["none", "Original"], ["warm", "Warm"], ["bw", "B&W"], ["sepia", "Sepia"], ["soft", "Soft"]], "filter");
-    chips($("tpls"), [["none", "None"], ["gold", "Gold Frame"], ["polaroid", "Polaroid"], ["full", "Full Photo"]], "tpl");
-    drawPrev();
+    return prepPhoto(img, false);
   }
   openM("composer");
+}
+function prepPhoto(img, fromCam) {
+  cur = { kind: "photo", img, filter: "none", tpl: "none", frame: fromCam && frameOK, fromCam };
+  $("gName").value = ls("wd_name") || ""; $("gCap").value = "";
+  $("photoTools").classList.remove("hidden"); $("storyBtn").classList.add("hidden");
+  $("frameRow").classList.toggle("hidden", !(fromCam && frameOK));
+  chips($("frameChips"), [[true, "Frame ON"], [false, "Frame OFF"]], "frame");
+  chips($("filters"), [["none", "Original"], ["warm", "Warm"], ["bw", "B&W"], ["sepia", "Sepia"], ["soft", "Soft"]], "filter");
+  chips($("tpls"), [["none", "None"], ["gold", "Gold Frame"], ["polaroid", "Polaroid"], ["full", "Full Photo"]], "tpl");
+  drawPrev(); openM("composer");
 }
 $("storyBtn").onclick = async () => {
   const c = await renderStory(cur.img, cur.filter, cur.tpl);
@@ -330,7 +353,7 @@ $("shareBtn").onclick = async () => {
   closeM("composer"); openM("overlay");
   try {
     let data, mime, local;
-    if (cur.kind === "photo") { local = renderPhoto(cur.img, MAX_SIDE, cur.filter).toDataURL("image/jpeg", .85); data = local.split(",")[1]; mime = "image/jpeg"; }
+    if (cur.kind === "photo") { local = renderPhoto(cur.img, MAX_SIDE, cur.filter, cur.frame).toDataURL("image/jpeg", .85); data = local.split(",")[1]; mime = "image/jpeg"; }
     else { const d = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(cur.f); }); data = d.split(",")[1]; mime = cur.f.type || "video/mp4"; }
     let item;
     if (DEMO) { used++; ls("wd_used", used); item = { id: "demo" + Date.now(), k: "photo", n: name, c: caption, t: Date.now(), mine: true, local }; }
@@ -343,6 +366,36 @@ $("shareBtn").onclick = async () => {
     $("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) { say(e.message || "Upload failed. Check your connection and try again.", true); }
   closeM("overlay"); cur = null;
+};
+
+/* ---------- Camera with wedding frame (photos only) ---------- */
+const frameImg = new Image(); let frameOK = false, stream = null, facing = "environment";
+frameImg.onload = () => { frameOK = true; };
+const camFrame = $("camFrame"); camFrame.onerror = () => { camFrame.style.display = "none"; };
+if (FRAME_IMAGE) { frameImg.src = FRAME_IMAGE; camFrame.src = FRAME_IMAGE; } else camFrame.style.display = "none";
+function stopStream() { if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; } }
+function closeCam() { stopStream(); closeM("cam"); }
+async function startStream() {
+  stopStream();
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+    const v = $("camVid"); v.srcObject = stream; v.style.transform = facing === "user" ? "scaleX(-1)" : ""; await v.play().catch(() => {});
+  } catch (e) { closeCam(); say("Camera access was blocked. Allow camera permission, or use Choose from Gallery.", true); }
+}
+async function openCam() {
+  closeM("sheet"); say("");
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return $("inCam").click();
+  openM("cam"); await startStream();
+}
+$("camFlip").onclick = () => { facing = facing === "user" ? "environment" : "user"; startStream(); };
+$("shutter").onclick = async () => {
+  const v = $("camVid"); if (!v.videoWidth) return;
+  const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
+  const r = Math.max(W / v.videoWidth, H / v.videoHeight), sw = W / r, sh = H / r;
+  if (facing === "user") { x.translate(W, 0); x.scale(-1, 1); }
+  x.drawImage(v, (v.videoWidth - sw) / 2, (v.videoHeight - sh) / 2, sw, sh, 0, 0, W, H);
+  const img = new Image(); await new Promise((res) => { img.onload = res; img.src = c.toDataURL("image/jpeg", .92); });
+  closeCam(); prepPhoto(img, true);
 };
 
 render(); load(); setInterval(load, REFRESH_SECONDS * 1000);
