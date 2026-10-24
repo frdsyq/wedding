@@ -45,6 +45,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .gal-title{font-family:'Playfair Display',Georgia,serif;font-size:26px;color:#222;display:inline-block;padding-bottom:3px;border-bottom:2px solid transparent;border-image:linear-gradient(90deg,#B99B5B,rgba(185,155,91,0)) 1}
 .leaf{position:fixed;width:170px;height:260px;opacity:.55;pointer-events:none;z-index:0}
 .leaf.a{right:-30px;top:60px;transform:scaleX(-1) rotate(8deg)}.leaf.b{left:-40px;bottom:150px;transform:rotate(-6deg)}.leaf.c{right:-40px;bottom:-40px;transform:scaleX(-1) rotate(165deg)}
+#shutter.vid{background:#e11d48}#shutter.rec{border-radius:16px}
+.giftbtn{width:100%;margin-top:14px;padding:11px;border-radius:10px;border:1px solid var(--gold);color:#8a7a55;background:rgba(255,255,255,.6);font-size:14px}
 </style>
 </head>
 <body class="min-h-screen">
@@ -82,6 +84,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
     <button id="uploadBtn" class="cta"><i data-lucide="camera"></i><span>Take or Upload Photo<span class="hidden md:inline">/Video</span></span></button>
     <div class="bar"><i id="barFill" style="width:100%"></i></div>
     <p class="mt-2 text-xs" style="color:#444"><span id="leftN"></span> <span id="leftSfx"><span class="md:hidden">uploads left</span><span class="hidden md:inline">uploads remaining</span></span></p>
+    <button id="giftBtn" class="giftbtn">💝 Wedding Gift (QR)</button>
     <p id="status" class="mt-2 text-sm text-center min-h-[1.25rem]" role="status"></p>
     <p id="demoNote" class="hidden mt-2 text-xs text-center rounded-lg px-3 py-2" style="background:#F3E9C6">Preview mode: photos show on this device only until you add your Apps Script URL.</p>
   </section>
@@ -103,7 +106,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <div id="sheet" class="modal items-end justify-center" style="background:rgba(0,0,0,.45)">
   <div class="w-full max-w-md rounded-t-3xl p-5 space-y-3" style="background:var(--cream)">
     <button class="btn w-full py-4" onclick="openCam()">📷 Open Camera (Photo + Wedding Frame)</button>
-    <button class="btn w-full py-4" onclick="pick('inVid')">🎥 Record Video (max 30s)</button>
+    <button class="btn w-full py-4" onclick="openCam('video')">🎥 Record Video (max 30s)</button>
     <button class="w-full py-4 rounded-full border border-[#D4AF37]" onclick="pick('inGal')">🖼️ Choose from Gallery</button>
     <button class="w-full py-2 text-sm opacity-70" onclick="closeM('sheet')">Cancel</button>
   </div>
@@ -112,14 +115,27 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <input id="inVid" type="file" accept="video/*" capture="environment" class="hidden">
 <input id="inGal" type="file" accept="image/*,video/*" class="hidden">
 
+<!-- Gift / donation page -->
+<div id="gift" class="modal items-center justify-center p-4" style="background:rgba(0,0,0,.5)">
+  <div class="relative w-full max-w-sm max-h-[92vh] overflow-y-auto rounded-3xl p-6 text-center" style="background:var(--cream)">
+    <button onclick="closeM('gift')" class="absolute top-3 right-4 text-xl" aria-label="Close">✕</button>
+    <p id="giftTitle" class="script text-4xl" style="color:#1c1c1a"></p>
+    <p id="giftNote" class="text-sm mt-2 opacity-80 leading-relaxed"></p>
+    <div class="mt-4 bg-white rounded-2xl p-3 shadow"><img id="giftQr" alt="Payment QR code" class="w-full h-auto rounded-lg"></div>
+    <p id="giftAcc" class="hidden mt-3 text-sm font-medium"></p>
+    <div class="flex gap-2 mt-4"><a id="giftSave" download="wedding-gift-qr.png" class="btn flex-1 py-3 text-sm block">⬇ Save QR</a><button id="giftCopy" class="hidden flex-1 py-3 text-sm rounded-full border border-[#B99B5B]">Copy account</button></div>
+    <p class="text-xs mt-3 opacity-60">Open your banking app, tap Scan, then pick this QR from your gallery.</p>
+  </div>
+</div>
+
 <!-- Camera with wedding frame -->
 <div id="cam" class="modal flex-col items-center" style="background:#000">
-  <div class="w-full flex justify-between items-center p-3 text-white"><button onclick="closeCam()" class="text-2xl px-2" aria-label="Close camera">✕</button><button id="camFlip" class="text-2xl px-2" aria-label="Switch camera">🔄</button></div>
+  <div class="w-full flex justify-between items-center p-3 text-white"><button onclick="closeCam()" class="text-2xl px-2" aria-label="Close camera">✕</button><span id="camTimer" class="text-sm"></span><button id="camFlip" class="text-2xl px-2" aria-label="Switch camera">🔄</button></div>
   <div class="relative overflow-hidden flex-none bg-neutral-900" style="width:min(100vw,calc((100dvh - 150px) * 9 / 16));aspect-ratio:9/16">
     <video id="camVid" playsinline muted autoplay class="absolute inset-0 w-full h-full object-cover"></video>
     <img id="camFrame" alt="" class="absolute inset-0 w-full h-full pointer-events-none">
   </div>
-  <div class="flex-1 flex items-center justify-center"><button id="shutter" aria-label="Take photo"></button></div>
+  <div class="flex-1 flex flex-col items-center justify-center gap-3"><div class="flex gap-2"><button id="mPhoto" class="chip on" style="color:#fff">Photo</button><button id="mVideo" class="chip" style="color:#fff">Video</button></div><button id="shutter" aria-label="Capture"></button></div>
 </div>
 
 <!-- Composer -->
@@ -158,8 +174,12 @@ const DEPLOYED_SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
 const COUPLE_NAMES = "Emir & Aida";         // change to your names
 const WEDDING_DATE = "07 November 2026";   // change to your date
 const HERO_IMAGE   = "hero.jpg";            // couple photo saved next to index.html (leave "" for none)
+const DONATE_QR_IMAGE = "qr.png";           // your DuitNow / bank QR saved next to index.html (leave "" to hide the gift button)
+const DONATE_TITLE = "Wedding Gift";
+const DONATE_NOTE  = "Your presence is the greatest gift. If you would like to give, you may scan the QR below.";
+const DONATE_ACCOUNT = "";                  // optional, e.g. "Maybank 1234 5678 9012 (Emir bin ...)". Leave "" to hide
 const FRAME_IMAGE  = "frame.png";           // transparent wedding frame applied to camera photos (leave "" for none)
-const MAX_UPLOADS  = 5;                     // display only; the real limit is MAX_UPLOADS in Code.gs
+const MAX_UPLOADS  = 7;                     // display only; the real limit is MAX_UPLOADS in Code.gs
 const MAX_VIDEO_SEC = 30;                   // longest video allowed
 const MAX_VIDEO_MB  = 20;                   // biggest video file allowed (Apps Script can't take huge files)
 const MAX_SIDE = 1600, REFRESH_SECONDS = 30;
@@ -171,7 +191,17 @@ const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k)
 const device = ls("wd_id") || (() => { const i = Math.random().toString(36).slice(2) + Date.now().toString(36); ls("wd_id", i); return i; })();
 let pin = sessionStorage.getItem("wd_pin") || "", used = +ls("wd_used") || 0, limit = MAX_UPLOADS, tab = "all", cur = null;
 const items = new Map(), tiles = new Map();
-const thumb = (id, s) => `https://drive.google.com/thumbnail?id=${id}&sz=w${s}`;
+const srcs = (id, s) => [`https://lh3.googleusercontent.com/d/${id}=w${s}`, `https://drive.google.com/thumbnail?id=${id}&sz=w${s}`];
+const thumb = (id, s) => srcs(id, s)[0];
+function chainSrc(im, id, s) {   // tries Google image links, then asks the Apps Script to send the picture itself
+  const list = srcs(id, s); let i = 0, tried = false; im.referrerPolicy = "no-referrer";
+  im.onerror = async () => {
+    i++; if (i < list.length) { im.src = list[i]; return; }
+    if (!DEMO && !tried) { tried = true; try { const r = await (await fetch(DEPLOYED_SCRIPT_URL + "?action=img&id=" + encodeURIComponent(id))).json(); if (r.success) { im.src = `data:${r.mime};base64,${r.data}`; return; } } catch (e) {} }
+    im.style.display = "none";
+  };
+  im.src = list[0];
+}
 const openM = (id) => $(id).classList.add("show"), closeM = (id) => $(id).classList.remove("show");
 const say = (m, err) => { $("status").style.color = err ? "#B4533C" : "var(--sage-d)"; $("status").textContent = m; };
 const api = async (b) => (await fetch(DEPLOYED_SCRIPT_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(b) })).json();
@@ -193,7 +223,7 @@ $("shareTop").onclick = async () => {
 /* ---------- Gallery ---------- */
 function mkTile(p) {
   const el = document.createElement("div"); el.className = "tile";
-  const im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = p.local || thumb(p.id, 800); im.onerror = () => { im.style.display = "none"; };
+  const im = new Image(); im.alt = ""; im.loading = "lazy"; if (p.local) im.src = p.local; else chainSrc(im, p.id, 800);
   el.append(im);
   if (p.k === "video") { const b = document.createElement("div"); b.className = "play"; b.textContent = "▶"; el.append(b); }
   if (p.n || p.c) { const c = document.createElement("div"); c.className = "cap"; const av = document.createElement("span"); av.className = "av"; av.textContent = (p.n || "♥").trim().charAt(0).toUpperCase(); const t = document.createElement("div"); t.className = "ct"; const n = document.createElement("b"); n.textContent = p.n || "Guest"; t.append(n); if (p.c) { const sp = document.createElement("span"); sp.textContent = p.c; t.append(sp); } c.append(av, t); el.append(c); }
@@ -277,7 +307,7 @@ function openLb(id) {
     node.src = `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
     node.onerror = () => { const f = document.createElement("iframe"); f.src = `https://drive.google.com/file/d/${id}/preview`; f.allow = "autoplay; fullscreen"; f.className = "w-full h-full border-0"; $("lbStage").replaceChildren(f); };
   } else {
-    node = new Image(); node.src = p.local || thumb(id, 2000); node.draggable = false; node.style.cssText = "max-width:100%;max-height:100%;object-fit:contain"; zoomable(node);
+    node = new Image(); if (p.local) node.src = p.local; else chainSrc(node, id, 2000); node.draggable = false; node.style.cssText = "max-width:100%;max-height:100%;object-fit:contain"; zoomable(node);
   }
   $("lbStage").replaceChildren(node);
   $("lbCap").textContent = [p.n, p.c].filter(Boolean).join(": ");
@@ -354,8 +384,8 @@ const pick = (id) => { closeM("sheet"); $(id).click(); };
 $("uploadBtn").onclick = () => { if (used >= limit) return say(`You've reached the limit of ${limit} uploads on this device.`, true); say(""); openM("sheet"); };
 ["inCam", "inVid", "inGal"].forEach((id) => { $(id).onchange = (e) => { const f = e.target.files[0]; e.target.value = ""; if (f) start(f); }; });
 
-async function start(f) {
-  const kind = f.type.startsWith("video") ? "video" : f.type.startsWith("image") ? "photo" : null;
+async function start(f, isRec) {
+  const kind = (f.type.startsWith("video") || /\.(mp4|mov|m4v|3gp|webm)$/i.test(f.name)) ? "video" : (f.type.startsWith("image") || /\.(jpe?g|png|webp|heic|heif)$/i.test(f.name)) ? "photo" : null;
   if (!kind) return say("Please choose a photo or a video.", true);
   $("gName").value = ls("wd_name") || ""; $("gCap").value = "";
   if (kind === "video") {
@@ -364,7 +394,7 @@ async function start(f) {
     const u = URL.createObjectURL(f), v = document.createElement("video");
     v.src = u; v.controls = true; v.muted = true; v.playsInline = true; v.style.cssText = "max-height:46vh;max-width:100%";
     await new Promise((r) => { v.onloadedmetadata = r; v.onerror = r; });
-    if (v.duration > MAX_VIDEO_SEC + .5) { URL.revokeObjectURL(u); return say(`Video is too long (max ${MAX_VIDEO_SEC} seconds).`, true); }
+    if (!isRec && v.duration > MAX_VIDEO_SEC + .5) { URL.revokeObjectURL(u); return say(`Video is too long (max ${MAX_VIDEO_SEC} seconds).`, true); }
     cur = { f, kind }; $("prevBox").replaceChildren(v); $("photoTools").classList.add("hidden"); $("storyBtn").classList.add("hidden");
   } else {
     const img = new Image(); const u = URL.createObjectURL(f);
@@ -398,7 +428,7 @@ $("shareBtn").onclick = async () => {
   try {
     let data, mime, local;
     if (cur.kind === "photo") { local = renderPhoto(cur.img, MAX_SIDE, cur.filter, cur.frame).toDataURL("image/jpeg", .85); data = local.split(",")[1]; mime = "image/jpeg"; }
-    else { const d = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(cur.f); }); data = d.split(",")[1]; mime = cur.f.type || "video/mp4"; }
+    else { const d = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(cur.f); }); data = d.split(",")[1]; mime = (cur.f.type || "video/mp4").split(";")[0]; }
     let item;
     if (DEMO) { used++; ls("wd_used", used); item = { id: "demo" + Date.now(), k: "photo", n: name, c: caption, t: Date.now(), mine: true, local }; }
     else {
@@ -408,31 +438,46 @@ $("shareBtn").onclick = async () => {
     }
     items.set(item.id, item); render(); say("Thank you! Your memory was added 💛");
     $("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
-  } catch (e) { say(e.message || "Upload failed. Check your connection and try again.", true); }
+  } catch (e) { say(e.message === "Failed to fetch" ? "Upload failed. The file may be too big, or the connection dropped. Please try again." : (e.message || "Upload failed. Please try again."), true); }
   closeM("overlay"); cur = null;
 };
 
-/* ---------- Camera with wedding frame (photos only) ---------- */
-const frameImg = new Image(); let frameOK = false, stream = null, facing = "environment";
+/* ---------- Camera: photo with wedding frame, or video ---------- */
+const frameImg = new Image(); let frameOK = false, stream = null, facing = "environment", camMode = "photo", rec = null, recTimer = null;
 frameImg.onload = () => { frameOK = true; };
 const camFrame = $("camFrame"); camFrame.onerror = () => { camFrame.style.display = "none"; };
 if (FRAME_IMAGE) { frameImg.src = FRAME_IMAGE; camFrame.src = FRAME_IMAGE; } else camFrame.style.display = "none";
 function stopStream() { if (stream) { stream.getTracks().forEach((t) => t.stop()); stream = null; } }
-function closeCam() { stopStream(); closeM("cam"); }
+function stopRec(discard) {
+  clearInterval(recTimer);
+  if (rec && rec.state !== "inactive") { if (discard) rec.onstop = null; rec.stop(); }
+  if (discard) rec = null;
+  $("shutter").classList.remove("rec"); $("camTimer").textContent = "";
+}
+function closeCam() { stopRec(true); stopStream(); closeM("cam"); }
+function setMode(m) {
+  camMode = m; $("mPhoto").classList.toggle("on", m === "photo"); $("mVideo").classList.toggle("on", m === "video");
+  $("shutter").classList.toggle("vid", m === "video"); camFrame.style.visibility = m === "photo" ? "visible" : "hidden";
+}
 async function startStream() {
   stopStream();
+  const vid = camMode === "video", base = { facingMode: { ideal: facing }, width: { ideal: vid ? 1280 : 1920 }, height: { ideal: vid ? 720 : 1080 } };
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: facing }, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+    try { stream = await navigator.mediaDevices.getUserMedia({ video: base, audio: vid }); }
+    catch (e) { if (!vid) throw e; stream = await navigator.mediaDevices.getUserMedia({ video: base, audio: false }); }
     const v = $("camVid"); v.srcObject = stream; v.style.transform = facing === "user" ? "scaleX(-1)" : ""; await v.play().catch(() => {});
   } catch (e) { closeCam(); say("Camera access was blocked. Allow camera permission, or use Choose from Gallery.", true); }
 }
-async function openCam() {
+async function openCam(mode) {
   closeM("sheet"); say("");
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return $("inCam").click();
-  openM("cam"); await startStream();
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return $(mode === "video" ? "inVid" : "inCam").click();
+  setMode(mode || "photo"); openM("cam"); await startStream();
 }
-$("camFlip").onclick = () => { facing = facing === "user" ? "environment" : "user"; startStream(); };
-$("shutter").onclick = async () => {
+const recording = () => rec && rec.state === "recording";
+$("mPhoto").onclick = () => { if (recording() || camMode === "photo") return; setMode("photo"); startStream(); };
+$("mVideo").onclick = () => { if (recording() || camMode === "video") return; setMode("video"); startStream(); };
+$("camFlip").onclick = () => { if (recording()) return; facing = facing === "user" ? "environment" : "user"; startStream(); };
+async function snap() {
   const v = $("camVid"); if (!v.videoWidth) return;
   const W = 1080, H = 1920, c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d");
   const r = Math.max(W / v.videoWidth, H / v.videoHeight), sw = W / r, sh = H / r;
@@ -440,7 +485,40 @@ $("shutter").onclick = async () => {
   x.drawImage(v, (v.videoWidth - sw) / 2, (v.videoHeight - sh) / 2, sw, sh, 0, 0, W, H);
   const img = new Image(); await new Promise((res) => { img.onload = res; img.src = c.toDataURL("image/jpeg", .92); });
   closeCam(); prepPhoto(img, true);
-};
+}
+function startRec() {
+  if (!stream || !window.MediaRecorder) { closeCam(); return say("This phone can't record video here. Use Choose from Gallery.", true); }
+  const mt = ["video/mp4;codecs=avc1.42E01E,mp4a.40.2", "video/mp4", "video/webm;codecs=vp9,opus", "video/webm;codecs=vp8,opus", "video/webm"].find((t) => MediaRecorder.isTypeSupported(t));
+  const chunks = [];
+  try { rec = new MediaRecorder(stream, { mimeType: mt, videoBitsPerSecond: 2200000, audioBitsPerSecond: 96000 }); }
+  catch (e) { closeCam(); return say("This phone can't record video here. Use Choose from Gallery.", true); }
+  rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+  rec.onstop = () => {
+    const type = (rec.mimeType || mt || "video/mp4").split(";")[0];
+    const f = new File(chunks, "memory." + (type.includes("mp4") ? "mp4" : "webm"), { type });
+    closeCam(); start(f, true);
+  };
+  rec.start(1000); const t0 = Date.now(); $("shutter").classList.add("rec");
+  recTimer = setInterval(() => {
+    const sec = Math.floor((Date.now() - t0) / 1000); $("camTimer").textContent = `● ${sec}s / ${MAX_VIDEO_SEC}s`;
+    if (sec >= MAX_VIDEO_SEC && recording()) rec.stop();
+  }, 250);
+}
+$("shutter").onclick = () => { if (camMode === "photo") return snap(); if (recording()) return rec.stop(); startRec(); };
+
+/* ---------- Gift / donation page ---------- */
+if (!DONATE_QR_IMAGE) $("giftBtn").classList.add("hidden");
+else {
+  $("giftTitle").textContent = DONATE_TITLE; $("giftNote").textContent = DONATE_NOTE;
+  $("giftQr").src = DONATE_QR_IMAGE; $("giftSave").href = DONATE_QR_IMAGE;
+  $("giftQr").onerror = () => { $("giftQr").style.display = "none"; $("giftNote").textContent = "The QR image (" + DONATE_QR_IMAGE + ") was not found. Upload it next to index.html."; };
+  if (DONATE_ACCOUNT) {
+    $("giftAcc").textContent = DONATE_ACCOUNT; $("giftAcc").classList.remove("hidden"); $("giftCopy").classList.remove("hidden");
+    $("giftCopy").onclick = async () => { try { await navigator.clipboard.writeText(DONATE_ACCOUNT); $("giftCopy").textContent = "Copied ✓"; } catch (e) { prompt("Copy this", DONATE_ACCOUNT); } };
+  }
+  $("giftBtn").onclick = () => openM("gift");
+  if (location.hash === "#gift") openM("gift");
+}
 
 render(); load(); setInterval(load, REFRESH_SECONDS * 1000);
 </script>
