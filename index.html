@@ -5,21 +5,23 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wedding Memories</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Montserrat:wght@400;500;600&family=Great+Vibes&family=Playfair+Display:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@0.453.0/dist/umd/lucide.min.js"></script>
 <style>
-:root{--cream:#FBF6EC;--sage:#9CAF88;--sage-d:#6F8660;--gold:#D4AF37}
+:root{--cream:#FCF9F1;--sage:#9CAF88;--sage-d:#6F8660;--gold:#B99B5B;--green:#1F4B3A}
 body{background:var(--cream);color:#4A4A3F;font-family:Montserrat,sans-serif;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
 .serif{font-family:'Cormorant Garamond',Georgia,serif}.gold{color:var(--gold)}
-.masonry{column-count:2;column-gap:10px}
-@media(min-width:768px){.masonry{column-count:3}}@media(min-width:1100px){.masonry{column-count:4}}
-.tile{position:relative;break-inside:avoid;margin-bottom:10px;border-radius:14px;overflow:hidden;background:#EFE8D6;border:2px solid #fff;box-shadow:0 6px 16px rgba(111,134,96,.2);cursor:zoom-in;animation:pop .4s ease-out}
+.grid-g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media(min-width:768px){.grid-g{grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}}@media(min-width:1024px){.grid-g{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.tile{position:relative;aspect-ratio:5/4;border-radius:14px;overflow:hidden;background:#EFE8D6;box-shadow:0 8px 18px rgba(80,70,40,.18);cursor:zoom-in;animation:pop .4s ease-out}
 @keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:none}}
-.tile img{display:block;width:100%;height:auto}
-.cap{position:absolute;left:0;right:0;bottom:0;padding:20px 8px 6px;background:linear-gradient(transparent,rgba(0,0,0,.62));color:#fff;font-size:11px;line-height:1.35}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cap{position:absolute;left:8px;right:8px;bottom:8px;display:flex;align-items:center;gap:8px;padding:7px 9px;border-radius:12px;background:rgba(45,40,30,.32);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);color:#fff;font-size:11px;line-height:1.25;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.av{flex:none;width:26px;height:26px;border-radius:99px;background:linear-gradient(135deg,#D6BC82,#B99B5B);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+.ct{min-width:0}.ct b,.ct span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ct b{font-size:12px;font-weight:600}
 .x{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:99px;background:rgba(0,0,0,.6);color:#fff;align-items:center;justify-content:center;font-size:13px}
-.play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:99px;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center}
-.btn{background:linear-gradient(135deg,var(--sage),var(--sage-d));color:#fff;border-radius:99px;font-weight:600;box-shadow:0 8px 22px rgba(111,134,96,.4);transition:transform .15s}.btn:active{transform:scale(.97)}
+.play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:99px;background:rgba(185,155,91,.95);color:#fff;display:flex;align-items:center;justify-content:center;padding-left:3px}
+.btn{background:linear-gradient(180deg,#2A5C48,#1F4B3A);color:#EBDDB0;border-radius:99px;font-weight:600;box-shadow:0 8px 20px rgba(31,75,58,.35);transition:transform .15s}.btn:active{transform:scale(.97)}
 .chip{padding:6px 14px;border-radius:99px;border:1px solid var(--gold);font-size:12px;white-space:nowrap;background:transparent}.chip.on{background:var(--gold);color:#fff}
 .ring{position:absolute;inset:-6px;border-radius:99px;border:2px solid var(--gold);opacity:.6;animation:ring 2.4s ease-out infinite}
 @keyframes ring{0%{transform:scale(.96);opacity:.7}100%{transform:scale(1.12);opacity:0}}
@@ -30,36 +32,68 @@ body{background:var(--cream);color:#4A4A3F;font-family:Montserrat,sans-serif;pad
 @media(prefers-reduced-motion:reduce){.ring,.tile,.spinner{animation:none}}
 button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 #shutter{width:68px;height:68px;border-radius:99px;background:#fff;border:4px solid #000;box-shadow:0 0 0 4px #fff}
+.script{font-family:'Great Vibes',cursive}.pf{font-family:'Playfair Display',Georgia,serif}
+.mono{font-family:'Playfair Display',Georgia,serif;font-style:italic;font-size:22px;color:var(--gold);letter-spacing:1px}
+.topshare{display:flex;align-items:center;gap:6px;font-size:13px;color:#8a7a55}.topshare svg{width:16px;height:16px}
+.arch{width:170px;padding:6px;border:1.5px solid var(--gold);border-radius:100px 100px 4px 4px;margin:0 auto}
+@media(min-width:768px){.arch{width:190px;border-radius:110px 110px 4px 4px}}
+.arch-in{position:relative;overflow:hidden;aspect-ratio:3/4;border-radius:90px 90px 2px 2px;background:linear-gradient(160deg,#E8EEDF,#F3E9C6)}
+.cta{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;padding:15px 20px;border-radius:10px;background:linear-gradient(180deg,#2A5C48,#1F4B3A);color:#E9D9A8;font-weight:500;font-size:15px;box-shadow:0 8px 20px rgba(31,75,58,.35);transition:transform .15s}.cta:active{transform:scale(.98)}.cta svg{width:20px;height:20px}
+.bar{width:100%;height:5px;border-radius:99px;background:#E6E1D3;margin-top:14px;overflow:hidden}.bar i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#D6BC82,#B99B5B);transition:width .4s}
+@media(min-width:768px){.bar i{background:var(--green)}}
+.tab{padding:7px 22px;border-radius:99px;border:1px solid #E3DCC8;background:#fff;font-size:13px;color:#333}.tab.on{background:linear-gradient(135deg,#D6BC82,#B99B5B);color:#fff;border-color:transparent}
+.gal-title{font-family:'Playfair Display',Georgia,serif;font-size:26px;color:#222;display:inline-block;padding-bottom:3px;border-bottom:2px solid transparent;border-image:linear-gradient(90deg,#B99B5B,rgba(185,155,91,0)) 1}
+.leaf{position:fixed;width:170px;height:260px;opacity:.55;pointer-events:none;z-index:0}
+.leaf.a{right:-30px;top:60px;transform:scaleX(-1) rotate(8deg)}.leaf.b{left:-40px;bottom:150px;transform:rotate(-6deg)}.leaf.c{right:-40px;bottom:-40px;transform:scaleX(-1) rotate(165deg)}
 </style>
 </head>
 <body class="min-h-screen">
 
-<div class="text-center py-3 text-sm font-medium" style="background:var(--sage);color:#fff"><span id="counterText">✨ 0 Memories Captured So Far ✨</span></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<path id="lf" d="M0 0C-9-8-11-22 0-34 11-22 9-8 0 0z"/>
+<g id="branch" fill="none" stroke="#C9AE72" stroke-width="1.1" stroke-linecap="round">
+<path d="M24 252C46 190 70 110 116 12"/>
+<use href="#lf" transform="translate(30 225) rotate(-65) scale(1.4)"/><use href="#lf" transform="translate(36 205) rotate(55) scale(1.4)"/>
+<use href="#lf" transform="translate(46 175) rotate(-65) scale(1.4)"/><use href="#lf" transform="translate(54 152) rotate(55) scale(1.4)"/>
+<use href="#lf" transform="translate(66 122) rotate(-65) scale(1.3)"/><use href="#lf" transform="translate(76 98) rotate(55) scale(1.3)"/>
+<use href="#lf" transform="translate(92 66) rotate(-65) scale(1.2)"/><use href="#lf" transform="translate(102 42) rotate(55) scale(1.2)"/>
+<use href="#lf" transform="translate(116 12) rotate(10) scale(1.1)"/>
+</g></defs></svg>
+<svg class="leaf a" viewBox="0 0 170 260" aria-hidden="true"><use href="#branch"/></svg>
+<svg class="leaf b" viewBox="0 0 170 260" aria-hidden="true"><use href="#branch"/></svg>
+<svg class="leaf c" viewBox="0 0 170 260" aria-hidden="true"><use href="#branch"/></svg>
 
-<main class="max-w-5xl mx-auto px-4 pb-14">
-  <header class="text-center pt-9 pb-4">
-    <div class="mx-auto w-44 h-60 md:w-52 md:h-72 rounded-t-full overflow-hidden relative" style="background:linear-gradient(160deg,#DCE5D2,#F3E9C6);box-shadow:0 0 0 6px var(--cream),0 0 0 8px var(--gold),0 22px 40px rgba(111,134,96,.3)">
-      <div id="heroFallback" class="absolute inset-0 flex items-center justify-center"><i data-lucide="heart" class="gold" style="width:44px;height:44px"></i></div>
+<div class="relative z-10 max-w-5xl mx-auto px-5 pt-5 flex items-center justify-between">
+  <div id="mono" class="mono"></div>
+  <button id="shareTop" class="topshare" aria-label="Share this page"><i data-lucide="share-2"></i><span class="md:hidden">Share</span><span id="urlTxt" class="hidden md:inline"></span></button>
+</div>
+
+<main class="relative z-10 max-w-5xl mx-auto px-5 pb-14">
+  <header class="text-center pt-5">
+    <div class="arch"><div class="arch-in">
+      <div id="heroFallback" class="absolute inset-0 flex items-center justify-center"><i data-lucide="heart" class="gold" style="width:40px;height:40px"></i></div>
       <img id="heroImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover">
-    </div>
-    <h1 id="names" class="serif gold text-5xl md:text-6xl font-semibold mt-9 leading-tight"></h1>
-    <p id="wdate" class="serif italic text-2xl" style="color:var(--sage-d)"></p>
-    <p class="mt-3 text-sm max-w-md mx-auto opacity-80 leading-relaxed">Share a photo or a short video, and leave a wish for the couple. Everything appears in the gallery below.</p>
+    </div></div>
+    <h1 id="names" class="script text-5xl md:text-6xl mt-7 leading-tight" style="color:#1c1c1a"></h1>
+    <p id="wdate" class="pf text-base md:text-lg mt-1" style="color:#222"></p>
   </header>
 
-  <section class="flex flex-col items-center py-4">
-    <div class="relative"><span class="ring"></span>
-      <button id="uploadBtn" class="btn relative px-8 py-5 text-lg">📸 Take or Upload Photo</button></div>
-    <p id="left" class="mt-4 text-xs opacity-70"></p>
+  <section class="flex flex-col items-center pt-6 w-full max-w-sm md:max-w-xs mx-auto">
+    <button id="uploadBtn" class="cta"><i data-lucide="camera"></i><span>Take or Upload Photo<span class="hidden md:inline">/Video</span></span></button>
+    <div class="bar"><i id="barFill" style="width:100%"></i></div>
+    <p class="mt-2 text-xs" style="color:#444"><span id="leftN"></span> <span id="leftSfx"><span class="md:hidden">uploads left</span><span class="hidden md:inline">uploads remaining</span></span></p>
     <p id="status" class="mt-2 text-sm text-center min-h-[1.25rem]" role="status"></p>
-    <p id="demoNote" class="hidden mt-2 text-xs text-center max-w-sm rounded-lg px-3 py-2" style="background:#F3E9C6">Preview mode: photos show on this device only until you add your Apps Script URL.</p>
+    <p id="demoNote" class="hidden mt-2 text-xs text-center rounded-lg px-3 py-2" style="background:#F3E9C6">Preview mode: photos show on this device only until you add your Apps Script URL.</p>
   </section>
 
-  <section class="mt-4">
-    <div class="flex items-center gap-4 mb-4"><div class="flex-1 h-px" style="background:var(--gold);opacity:.5"></div><h2 class="serif text-3xl gold">The Gallery</h2><div class="flex-1 h-px" style="background:var(--gold);opacity:.5"></div></div>
-    <div id="tabs" class="flex justify-center gap-2 mb-5"></div>
+  <section class="mt-6">
+    <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-3">
+      <h2 class="gal-title self-start">The Gallery</h2>
+      <div id="tabs" class="flex gap-2 justify-center md:justify-end"></div>
+    </div>
+    <p class="text-center text-xs mb-4" style="color:var(--gold)"><span id="counterText">✨ 0 Memories Captured So Far ✨</span></p>
     <p id="empty" class="text-center text-sm opacity-70 py-10">No memories yet. Be the first to share one.</p>
-    <div id="gallery" class="masonry"></div>
+    <div id="gallery" class="grid-g"></div>
   </section>
 
   <footer class="text-center mt-12 text-xs opacity-60"><button id="adminLink" class="underline">Admin</button></footer>
@@ -121,8 +155,8 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <script>
 /* ==================== YOUR SETTINGS ==================== */
 const DEPLOYED_SCRIPT_URL = "YOUR_APPS_SCRIPT_URL_HERE";
-const COUPLE_NAMES = "Aida & Emir";         // change to your names
-const WEDDING_DATE = "7 November 2026";    // change to your date
+const COUPLE_NAMES = "Emir & Aida";         // change to your names
+const WEDDING_DATE = "07 November 2026";   // change to your date
 const HERO_IMAGE   = "hero.jpg";            // couple photo saved next to index.html (leave "" for none)
 const FRAME_IMAGE  = "frame.png";           // transparent wedding frame applied to camera photos (leave "" for none)
 const MAX_UPLOADS  = 5;                     // display only; the real limit is MAX_UPLOADS in Code.gs
@@ -148,14 +182,21 @@ $("names").textContent = COUPLE_NAMES; $("wdate").textContent = WEDDING_DATE; do
 if (DEMO) $("demoNote").classList.remove("hidden");
 if (HERO_IMAGE) { const h = $("heroImg"); h.onload = () => { h.classList.remove("hidden"); $("heroFallback").style.display = "none"; }; h.src = HERO_IMAGE; }
 lucide.createIcons();
+$("mono").textContent = COUPLE_NAMES.split("&").map((t) => t.trim().charAt(0)).join("&");
+$("urlTxt").textContent = location.host ? location.host + location.pathname.replace(/index\.html$/, "").replace(/\/$/, "") : "";
+$("shareTop").onclick = async () => {
+  const u = location.href;
+  if (navigator.share) { try { await navigator.share({ title: COUPLE_NAMES, url: u }); } catch (e) {} }
+  else { try { await navigator.clipboard.writeText(u); say("Link copied"); } catch (e) { prompt("Copy this link", u); } }
+};
 
 /* ---------- Gallery ---------- */
 function mkTile(p) {
-  const el = document.createElement("div"); el.className = "tile"; el.style.minHeight = "110px";
+  const el = document.createElement("div"); el.className = "tile";
   const im = new Image(); im.alt = ""; im.loading = "lazy"; im.src = p.local || thumb(p.id, 800); im.onerror = () => { im.style.display = "none"; };
   el.append(im);
   if (p.k === "video") { const b = document.createElement("div"); b.className = "play"; b.textContent = "▶"; el.append(b); }
-  if (p.n || p.c) { const c = document.createElement("div"); c.className = "cap"; const n = document.createElement("b"); n.textContent = p.n || ""; c.append(n); if (p.c) c.append(document.createElement("br"), p.c); el.append(c); }
+  if (p.n || p.c) { const c = document.createElement("div"); c.className = "cap"; const av = document.createElement("span"); av.className = "av"; av.textContent = (p.n || "♥").trim().charAt(0).toUpperCase(); const t = document.createElement("div"); t.className = "ct"; const n = document.createElement("b"); n.textContent = p.n || "Guest"; t.append(n); if (p.c) { const sp = document.createElement("span"); sp.textContent = p.c; t.append(sp); } c.append(av, t); el.append(c); }
   const x = document.createElement("button"); x.className = "x"; x.textContent = "✕"; x.setAttribute("aria-label", "Delete");
   x.onclick = (e) => { e.stopPropagation(); del(p.id); };
   el.append(x); el.onclick = () => openLb(p.id);
@@ -171,7 +212,10 @@ function render() {
   });
   $("counterText").textContent = `✨ ${items.size} Memories Captured So Far ✨`;
   $("empty").classList.toggle("hidden", items.size > 0);
-  $("left").textContent = used >= limit ? "Upload limit reached on this device" : `${limit - used} of ${limit} uploads left on this device`;
+  const full = used >= limit;
+  $("leftN").textContent = full ? "Upload limit reached on this device" : `${limit - used} of ${limit}`;
+  $("leftSfx").style.display = full ? "none" : "";
+  $("barFill").style.width = Math.max(0, (limit - used) / limit * 100) + "%";
   $("adminLink").textContent = pin ? "Exit admin mode" : "Admin";
 }
 async function load() {
@@ -192,7 +236,7 @@ async function del(id) {
   items.delete(id); render();
 }
 $("tabs").replaceChildren(...[["all", "All"], ["photo", "Photos"], ["video", "Videos"]].map(([v, l]) => {
-  const b = document.createElement("button"); b.className = "chip" + (v === "all" ? " on" : ""); b.textContent = l;
+  const b = document.createElement("button"); b.className = "tab" + (v === "all" ? " on" : ""); b.textContent = l;
   b.onclick = () => { tab = v; [...$("tabs").children].forEach((c) => c.classList.toggle("on", c === b)); render(); }; return b;
 }));
 
