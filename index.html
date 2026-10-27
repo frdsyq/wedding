@@ -198,7 +198,7 @@ const MAX_SIDE = 1600, REFRESH_SECONDS = 30;
 /* ======================================================= */
 
 const $ = (id) => document.getElementById(id);
-const DEMO = DEPLOYED_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbz4kw3DRR4c3pu1Cx9XDwjvbR03k0wg1x_RywAV2CBhqVqHawK-QBP7CBWQpygokU9IEg/exec");
+const DEMO = DEPLOYED_SCRIPT_URL.includes("YOUR_APPS_SCRIPT_URL_HERE");
 const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
 const device = ls("wd_id") || (() => { const i = Math.random().toString(36).slice(2) + Date.now().toString(36); ls("wd_id", i); return i; })();
 let pin = sessionStorage.getItem("wd_pin") || "", used = +ls("wd_used") || 0, limit = MAX_UPLOADS, tab = "all", cur = null;
