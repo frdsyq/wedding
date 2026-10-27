@@ -193,11 +193,12 @@ const FRAME_IMAGE  = "frame.png";           // transparent wedding frame applied
 const MAX_UPLOADS  = 7;                     // display only; the real limit is MAX_UPLOADS in Code.gs
 const MAX_VIDEO_SEC = 30;                   // longest video allowed
 const MAX_VIDEO_MB  = 20;                   // biggest video file allowed (Apps Script can't take huge files)
+const DRIVE_API_KEY = "";                   // optional: Google API key that lets videos play instantly and with one play button (see notes)
 const MAX_SIDE = 1600, REFRESH_SECONDS = 30;
 /* ======================================================= */
 
 const $ = (id) => document.getElementById(id);
-const DEMO = DEPLOYED_SCRIPT_URL.includes("YOUR_APPS_SCRIPT_URL_HERE");
+const DEMO = DEPLOYED_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbz4kw3DRR4c3pu1Cx9XDwjvbR03k0wg1x_RywAV2CBhqVqHawK-QBP7CBWQpygokU9IEg/exec");
 const ls = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } };
 const device = ls("wd_id") || (() => { const i = Math.random().toString(36).slice(2) + Date.now().toString(36); ls("wd_id", i); return i; })();
 let pin = sessionStorage.getItem("wd_pin") || "", used = +ls("wd_used") || 0, limit = MAX_UPLOADS, tab = "all", cur = null;
@@ -311,25 +312,37 @@ function zoomable(im) {
   };
   im.onwheel = (e) => { e.preventDefault(); s = Math.min(5, Math.max(1, s - e.deltaY / 300)); if (s === 1) x = y = 0; ap(); };
 }
+function driveFrame(id) {
+  const f = document.createElement("iframe"); f.src = `https://drive.google.com/file/d/${id}/preview`; f.allow = "autoplay; fullscreen"; f.className = "w-full h-full border-0"; return f;
+}
 function videoPlayer(id, p) {
+  const urls = [];
+  if (p.localVideo) urls.push(p.localVideo);   // the uploader's own copy plays instantly
+  if (DRIVE_API_KEY) urls.push(`https://www.googleapis.com/drive/v3/files/${id}?alt=media&key=${DRIVE_API_KEY}`);
+  if (!urls.length) return driveFrame(id);
+  let i = 0;
   const box = document.createElement("div"); box.style.cssText = "position:relative;max-width:100%;display:flex;align-items:center;justify-content:center";
   const v = document.createElement("video"); v.playsInline = true; v.preload = "metadata"; v.poster = p.local || thumb(id, 1200);
-  v.style.cssText = "max-width:100%;max-height:calc(100vh - 150px);background:#000"; v.setAttribute("controlsList", "nodownload");
-  const urls = [`https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`, `https://drive.google.com/uc?export=download&id=${id}`]; let i = 0;
+  v.style.cssText = "max-width:100%;max-height:calc(100vh - 150px);background:#000";
   const big = document.createElement("button"); big.textContent = "▶"; big.setAttribute("aria-label", "Play");
   big.style.cssText = "position:absolute;width:68px;height:68px;border-radius:99px;background:rgba(185,155,91,.95);color:#fff;font-size:26px;padding-left:5px;box-shadow:0 4px 14px rgba(0,0,0,.4)";
   const bar = document.createElement("input"); bar.type = "range"; bar.min = 0; bar.max = 1000; bar.value = 0; bar.setAttribute("aria-label", "Seek");
   bar.style.cssText = "position:absolute;left:10px;right:10px;bottom:8px;width:calc(100% - 20px);accent-color:#E7D39A";
-  const msg = document.createElement("div"); msg.style.cssText = "display:none;position:absolute;inset:auto 10px 40px;text-align:center;color:#fff;font-size:13px";
-  msg.innerHTML = 'This video can\'t play here. <a target="_blank" rel="noopener" style="text-decoration:underline" href="https://drive.google.com/file/d/' + id + '/view">Open it in Google Drive</a>';
   v.src = urls[0];
-  v.onerror = () => { i++; if (i < urls.length) { v.src = urls[i]; return; } big.style.display = "none"; bar.style.display = "none"; msg.style.display = "block"; };
+  v.onerror = () => { i++; if (i < urls.length) { v.src = urls[i]; return; } $("lbStage").replaceChildren(driveFrame(id)); };
   const toggle = () => { if (v.paused) { const r = v.play(); if (r && r.catch) r.catch(() => {}); } else v.pause(); };
   big.onclick = toggle; v.onclick = toggle;
   v.onplay = () => { big.style.display = "none"; }; v.onpause = () => { big.style.display = ""; }; v.onended = () => { big.style.display = ""; };
   v.ontimeupdate = () => { if (v.duration) bar.value = v.currentTime / v.duration * 1000; };
   bar.oninput = () => { if (v.duration) v.currentTime = bar.value / 1000 * v.duration; };
-  box.append(v, big, bar, msg); return box;
+  box.append(v, big, bar); return box;
+}
+async function posterOf(v) {   // one still frame, so the uploader's video tile shows up instantly
+  try {
+    v.currentTime = .1; await new Promise((r) => { v.onseeked = r; setTimeout(r, 1500); });
+    const c = document.createElement("canvas"), w = 360, h = Math.round(w * (v.videoHeight || 640) / (v.videoWidth || 360)); c.width = w; c.height = h;
+    c.getContext("2d").drawImage(v, 0, 0, w, h); return c.toDataURL("image/jpeg", .7);
+  } catch (e) { return null; }
 }
 function openLb(id) {
   const p = items.get(id); if (!p) return;
@@ -426,7 +439,7 @@ async function start(f, isRec) {
     v.src = u; v.controls = true; v.muted = true; v.playsInline = true; v.style.cssText = "max-height:46vh;max-width:100%";
     await new Promise((r) => { v.onloadedmetadata = r; v.onerror = r; });
     if (!isRec && v.duration > MAX_VIDEO_SEC + .5) { URL.revokeObjectURL(u); return say(`Video is too long (max ${MAX_VIDEO_SEC} seconds).`, true); }
-    cur = { f, kind }; $("prevBox").replaceChildren(v); $("photoTools").classList.add("hidden"); $("storyBtn").classList.add("hidden");
+    cur = { f, kind, poster: await posterOf(v) }; $("prevBox").replaceChildren(v); $("photoTools").classList.add("hidden"); $("storyBtn").classList.add("hidden");
   } else {
     const img = new Image(); const u = URL.createObjectURL(f);
     try { await new Promise((res, rej) => { img.onload = res; img.onerror = rej; img.src = u; }); } catch (e) { return say("This photo format isn't supported. Please try another.", true); }
@@ -465,7 +478,7 @@ $("shareBtn").onclick = async () => {
     else {
       const r = await api({ action: "upload", device, kind: cur.kind, mime, name, caption, data });
       if (!r.success) throw new Error(r.error || "Upload failed");
-      used = r.used; item = { id: r.id, k: cur.kind, n: name, c: caption, t: Date.now(), mine: true, local };
+      used = r.used; item = { id: r.id, k: cur.kind, n: name, c: caption, t: Date.now(), mine: true, local: local || cur.poster, localVideo: cur.kind === "video" ? URL.createObjectURL(cur.f) : undefined };
     }
     items.set(item.id, item); render(); load(); say("Thank you! Your memory was added 💛");
     $("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
