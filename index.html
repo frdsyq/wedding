@@ -60,6 +60,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .card .bar{background:rgba(255,255,255,.18)}.card .bar i{background:linear-gradient(90deg,#E7D39A,#C9AE6B)}
 .card .giftbtn{background:rgba(0,0,0,.14);color:#F6EFD9;border-color:rgba(231,211,154,.7)}
 .card .tile{box-shadow:0 8px 18px rgba(0,0,0,.35)}
+.tile img,#lbStage img,#lbStage video{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
 </style>
 </head>
 <body class="min-h-screen">
@@ -117,6 +118,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
     <button class="btn w-full py-4" onclick="openCam()">📷 Open Camera (Photo + Wedding Frame)</button>
     <button class="btn w-full py-4" onclick="openCam('video')">🎥 Record Video (max 30s)</button>
     <button class="w-full py-4 rounded-full border border-[#D4AF37]" onclick="pick('inGal')">🖼️ Choose from Gallery</button>
+    <p id="sheetNote" class="text-xs text-center opacity-70"></p>
     <button class="w-full py-2 text-sm opacity-70" onclick="closeM('sheet')">Cancel</button>
   </div>
 </div>
@@ -272,7 +274,9 @@ async function load() {
 async function del(id) {
   if (!confirm("Delete this memory?")) return;
   if (!DEMO) { try { const r = await api({ action: "delete", id, device, pin }); if (!r.success) return alert(r.error || "Could not delete"); } catch (e) { return alert("Network error. Try again."); } }
-  items.delete(id); render();
+  const it = items.get(id);
+  if (it && it.mine && !pin) { used = Math.max(0, used - 1); if (DEMO) ls("wd_used", used); }   // deleting your own photo frees a slot
+  items.delete(id); render(); load();
 }
 $("tabs").replaceChildren(...[["all", "All"], ["photo", "Photos"], ["video", "Videos"]].map(([v, l]) => {
   const b = document.createElement("button"); b.className = "tab" + (v === "all" ? " on" : ""); b.textContent = l;
@@ -307,20 +311,38 @@ function zoomable(im) {
   };
   im.onwheel = (e) => { e.preventDefault(); s = Math.min(5, Math.max(1, s - e.deltaY / 300)); if (s === 1) x = y = 0; ap(); };
 }
+function videoPlayer(id, p) {
+  const box = document.createElement("div"); box.style.cssText = "position:relative;max-width:100%;display:flex;align-items:center;justify-content:center";
+  const v = document.createElement("video"); v.playsInline = true; v.preload = "metadata"; v.poster = p.local || thumb(id, 1200);
+  v.style.cssText = "max-width:100%;max-height:calc(100vh - 150px);background:#000"; v.setAttribute("controlsList", "nodownload");
+  const urls = [`https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`, `https://drive.google.com/uc?export=download&id=${id}`]; let i = 0;
+  const big = document.createElement("button"); big.textContent = "▶"; big.setAttribute("aria-label", "Play");
+  big.style.cssText = "position:absolute;width:68px;height:68px;border-radius:99px;background:rgba(185,155,91,.95);color:#fff;font-size:26px;padding-left:5px;box-shadow:0 4px 14px rgba(0,0,0,.4)";
+  const bar = document.createElement("input"); bar.type = "range"; bar.min = 0; bar.max = 1000; bar.value = 0; bar.setAttribute("aria-label", "Seek");
+  bar.style.cssText = "position:absolute;left:10px;right:10px;bottom:8px;width:calc(100% - 20px);accent-color:#E7D39A";
+  const msg = document.createElement("div"); msg.style.cssText = "display:none;position:absolute;inset:auto 10px 40px;text-align:center;color:#fff;font-size:13px";
+  msg.innerHTML = 'This video can\'t play here. <a target="_blank" rel="noopener" style="text-decoration:underline" href="https://drive.google.com/file/d/' + id + '/view">Open it in Google Drive</a>';
+  v.src = urls[0];
+  v.onerror = () => { i++; if (i < urls.length) { v.src = urls[i]; return; } big.style.display = "none"; bar.style.display = "none"; msg.style.display = "block"; };
+  const toggle = () => { if (v.paused) { const r = v.play(); if (r && r.catch) r.catch(() => {}); } else v.pause(); };
+  big.onclick = toggle; v.onclick = toggle;
+  v.onplay = () => { big.style.display = "none"; }; v.onpause = () => { big.style.display = ""; }; v.onended = () => { big.style.display = ""; };
+  v.ontimeupdate = () => { if (v.duration) bar.value = v.currentTime / v.duration * 1000; };
+  bar.oninput = () => { if (v.duration) v.currentTime = bar.value / 1000 * v.duration; };
+  box.append(v, big, bar, msg); return box;
+}
 function openLb(id) {
   const p = items.get(id); if (!p) return;
   let node;
   if (p.k === "video") {
-    node = document.createElement("video"); node.controls = true; node.playsInline = true; node.preload = "metadata";
-    node.poster = p.local || thumb(id, 1200); node.style.cssText = "max-width:100%;max-height:100%";
-    node.src = `https://drive.usercontent.google.com/download?id=${id}&export=download&confirm=t`;
-    node.onerror = () => { const f = document.createElement("iframe"); f.src = `https://drive.google.com/file/d/${id}/preview`; f.allow = "autoplay; fullscreen"; f.className = "w-full h-full border-0"; $("lbStage").replaceChildren(f); };
+    node = videoPlayer(id, p);
   } else {
     node = new Image(); if (p.local) node.src = p.local; else chainSrc(node, id, 2000); node.draggable = false; node.style.cssText = "max-width:100%;max-height:100%;object-fit:contain"; zoomable(node);
   }
   $("lbStage").replaceChildren(node);
   $("lbCap").textContent = [p.n, p.c].filter(Boolean).join(": ");
   $("lbSave").onclick = () => p.local && p.k === "photo" ? dl(p.local, "memory.jpg") : dl(`https://drive.google.com/uc?export=download&id=${id}`, "memory");
+  $("lbSave").style.display = (p.mine || pin) ? "" : "none";   // guests can only save their own photos
   openM("lb");
 }
 
@@ -399,7 +421,7 @@ async function start(f, isRec) {
   $("gName").value = ls("wd_name") || ""; $("gCap").value = "";
   if (kind === "video") {
     if (DEMO) return say("Videos work once your Apps Script URL is added.", true);
-    if (f.size > MAX_VIDEO_MB * 1048576) return say(`Video is too large (max ${MAX_VIDEO_MB} MB). Try recording at 720p.`, true);
+    if (f.size > MAX_VIDEO_MB * 1048576) return say(`Video is too large (max ${MAX_VIDEO_MB} MB). Tap "Record Video" to make a smaller one.`, true);
     const u = URL.createObjectURL(f), v = document.createElement("video");
     v.src = u; v.controls = true; v.muted = true; v.playsInline = true; v.style.cssText = "max-height:46vh;max-width:100%";
     await new Promise((r) => { v.onloadedmetadata = r; v.onerror = r; });
@@ -445,7 +467,7 @@ $("shareBtn").onclick = async () => {
       if (!r.success) throw new Error(r.error || "Upload failed");
       used = r.used; item = { id: r.id, k: cur.kind, n: name, c: caption, t: Date.now(), mine: true, local };
     }
-    items.set(item.id, item); render(); say("Thank you! Your memory was added 💛");
+    items.set(item.id, item); render(); load(); say("Thank you! Your memory was added 💛");
     $("gallery").scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (e) { say(e.message === "Failed to fetch" ? "Upload failed. The file may be too big, or the connection dropped. Please try again." : (e.message || "Upload failed. Please try again."), true); }
   closeM("overlay"); cur = null;
@@ -528,6 +550,10 @@ else {
   $("giftBtn").onclick = () => openM("gift");
   if (location.hash === "#gift") openM("gift");
 }
+
+/* ---------- Casual protection: no long-press/right-click save on the gallery ---------- */
+["contextmenu", "dragstart"].forEach((ev) => { $("gallery").addEventListener(ev, (e) => e.preventDefault()); $("lbStage").addEventListener(ev, (e) => e.preventDefault()); });
+$("sheetNote").textContent = `Photos: any size (resized automatically). Videos: up to ${MAX_VIDEO_SEC} seconds and ${MAX_VIDEO_MB} MB.`;
 
 /* ---------- Gold dust ---------- */
 (function () {
