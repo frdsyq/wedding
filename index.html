@@ -61,6 +61,18 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .card .giftbtn{background:rgba(0,0,0,.14);color:#F6EFD9;border-color:rgba(231,211,154,.7)}
 .card .tile{box-shadow:0 8px 18px rgba(0,0,0,.35)}
 .tile img,#lbStage img,#lbStage video{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:none}
+.arch2{container-type:inline-size;width:min(336px,100%);margin:0 auto;padding:6px;border:1.5px solid #E0C98A;border-radius:170px 170px 6px 6px;box-shadow:0 0 0 7px rgba(224,201,138,.3),0 18px 40px rgba(0,0,0,.35)}
+.arch2-in{position:relative;overflow:hidden;height:104cqw;border-radius:162px 162px 3px 3px;background:radial-gradient(ellipse at 50% 30%,#9A2A42 0%,#6E1328 55%,#4B0B1B 100%)}
+.arch2-in:before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse at 50% 18%,rgba(255,214,140,.22),transparent 55%)}
+.pp{position:absolute;height:auto;filter:drop-shadow(0 8px 10px rgba(0,0,0,.3))}
+.pp.br{width:88.3cqw;left:-19.6cqw;top:15.6cqw;z-index:1}.pp.gr{width:65.9cqw;left:40.9cqw;top:16.1cqw;z-index:2}
+.arch2-in .fade{position:absolute;left:0;right:0;bottom:0;height:27cqw;background:linear-gradient(to bottom,rgba(75,11,27,0),rgba(75,11,27,.97));z-index:3}
+.bq{position:absolute;bottom:-9cqw;width:47cqw;z-index:4;filter:drop-shadow(0 4px 8px rgba(0,0,0,.35))}.bq.r{right:-7cqw}.bq.l{left:-7cqw;transform:scaleX(-1)}
+.arch2-in .sp{position:absolute;border-radius:99px;background:#fff;box-shadow:0 0 8px 2px rgba(255,236,170,.9);z-index:5;opacity:.9}
+.ey{font-size:11px;letter-spacing:4px;color:#E7D39A;margin-top:26px;position:relative;z-index:2}
+.names2{position:relative;z-index:2;margin:6px 0 0;font-weight:400;line-height:1.1}
+.names2 .nm{font-family:'Great Vibes',cursive;font-size:52px;line-height:1.1}.names2 .amp{font-family:'Great Vibes',cursive;font-size:36px;color:#E7D39A;padding:0 4px}
+.date2{position:relative;z-index:2;display:flex;align-items:center;justify-content:center;gap:12px;font-size:15px;margin-top:8px}.date2:before,.date2:after{content:"";width:46px;height:1px;background:linear-gradient(90deg,transparent,#E7D39A)}.date2:after{transform:scaleX(-1)}
 </style>
 </head>
 <body class="min-h-screen">
@@ -80,12 +92,17 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <svg class="flourish" viewBox="0 0 300 40" aria-hidden="true"><use href="#flourishG"/><use href="#flourishG" transform="translate(300 0) scale(-1 1)"/><path d="M150 7L156 20 150 33 144 20Z" fill="#E7D39A" stroke="none"/><circle cx="150" cy="3" r="2" fill="#E7D39A"/></svg>
 <main class="relative z-10 max-w-5xl mx-auto px-5 pb-44 md:pb-56">
   <header class="text-center pt-5">
-    <div class="arch"><div class="arch-in">
-      <div id="heroFallback" class="absolute inset-0 flex items-center justify-center"><i data-lucide="heart" class="gold" style="width:40px;height:40px"></i></div>
-      <img id="heroImg" alt="" class="hidden absolute inset-0 w-full h-full object-cover">
+    <div class="arch2"><div class="arch2-in">
+      <img id="brideImg" class="pp br" alt="Bride">
+      <img id="groomImg" class="pp gr" alt="Groom">
+      <div class="fade"></div>
+      <i class="sp" style="left:14%;top:14%;width:3px;height:3px"></i><i class="sp" style="left:82%;top:10%;width:4px;height:4px"></i><i class="sp" style="left:56%;top:5%;width:2.5px;height:2.5px"></i><i class="sp" style="left:92%;top:36%;width:3px;height:3px"></i><i class="sp" style="left:7%;top:40%;width:2.5px;height:2.5px"></i>
+      <img class="bq l" src="floral-bottom-right.png" alt="" aria-hidden="true">
+      <img class="bq r" src="floral-bottom-right.png" alt="" aria-hidden="true">
     </div></div>
-    <h1 id="names" class="script text-5xl md:text-6xl mt-7 leading-tight"></h1>
-    <p id="wdate" class="pf text-base md:text-lg mt-1"></p>
+    <p class="ey">THE WEDDING OF</p>
+    <h1 id="names" class="names2"></h1>
+    <p id="wdate" class="pf date2"></p>
   </header>
 
   <section class="flex flex-col items-center pt-6 w-full max-w-sm md:max-w-xs mx-auto">
@@ -182,9 +199,10 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <script>
 /* ==================== YOUR SETTINGS ==================== */
 const DEPLOYED_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz4kw3DRR4c3pu1Cx9XDwjvbR03k0wg1x_RywAV2CBhqVqHawK-QBP7CBWQpygokU9IEg/exec";
-const COUPLE_NAMES = "Emir & Aida";         // change to your names
+const COUPLE_NAMES = "Aida & Emir";         // bride first, then groom
 const WEDDING_DATE = "07 November 2026";   // change to your date
-const HERO_IMAGE   = "hero.jpg";            // couple photo saved next to index.html (leave "" for none)
+const BRIDE_IMAGE  = "bride.png";           // bride portrait (shown on the left)
+const GROOM_IMAGE  = "groom.png";           // groom portrait (shown on the right)
 const DONATE_QR_IMAGE = "qr.png";           // your DuitNow / bank QR saved next to index.html (leave "" to hide the gift button)
 const DONATE_TITLE = "Wedding Gift";
 const DONATE_NOTE  = "Your presence is the greatest gift. If you would like to give, you may scan the QR below.";
@@ -220,9 +238,10 @@ const api = async (b) => (await fetch(DEPLOYED_SCRIPT_URL, { method: "POST", hea
 const dl = (href, name) => { const a = document.createElement("a"); a.href = href; a.download = name; document.body.appendChild(a); a.click(); a.remove(); };
 
 /* ---------- Header ---------- */
-$("names").textContent = COUPLE_NAMES; $("wdate").textContent = WEDDING_DATE; document.title = COUPLE_NAMES;
+$("wdate").textContent = WEDDING_DATE; document.title = COUPLE_NAMES; $("names").setAttribute("aria-label", COUPLE_NAMES);
+{ const [n1, n2] = COUPLE_NAMES.split("&").map((t) => t.trim()), mk = (c, t) => { const e = document.createElement("span"); e.className = c; e.textContent = t; return e; }; $("names").append(mk("nm", n1), mk("amp", "&"), mk("nm", n2 || "")); }
+[["brideImg", BRIDE_IMAGE], ["groomImg", GROOM_IMAGE]].forEach(([id, u]) => { const im = $(id); im.onerror = () => { im.style.display = "none"; }; if (u) im.src = u; else im.style.display = "none"; });
 if (DEMO) $("demoNote").classList.remove("hidden");
-if (HERO_IMAGE) { const h = $("heroImg"); h.onload = () => { h.classList.remove("hidden"); $("heroFallback").style.display = "none"; }; h.src = HERO_IMAGE; }
 lucide.createIcons();
 $("mono").textContent = COUPLE_NAMES.split("&").map((t) => t.trim().charAt(0)).join("&");
 $("urlTxt").textContent = location.host ? location.host + location.pathname.replace(/index\.html$/, "").replace(/\/$/, "") : "";
